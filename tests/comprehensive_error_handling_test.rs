@@ -252,7 +252,7 @@ fn test_provider_error_display_formatting() {
         assert!(display.contains("Test error message"));
 
         // Test with source error
-        let source_error = anyhow::anyhow!("Source error");
+        let source_error = eyre::eyre!("Source error");
 
         let error_with_source = ProviderError {
             error_type: ErrorType::ApiError,
