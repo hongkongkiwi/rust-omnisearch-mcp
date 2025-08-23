@@ -1,5 +1,6 @@
 pub mod cache;
 pub mod circuit_breaker;
+pub mod health;
 pub mod http;
 pub mod macros;
 pub mod metrics;
