@@ -1,139 +1,128 @@
-use std::env;
+use figment::{Figment, providers::{Format, Toml, Yaml, Env}};
+use serde::{Deserialize, Serialize};
+use std::{path::Path, time::Duration};
+use eyre::{Result, eyre};
+use once_cell::sync::Lazy;
 
-// Search provider API keys
-pub fn tavily_api_key() -> Option<String> {
-    env::var("TAVILY_API_KEY").ok()
-}
-
-pub fn brave_api_key() -> Option<String> {
-    env::var("BRAVE_API_KEY").ok()
-}
-
-pub fn kagi_api_key() -> Option<String> {
-    env::var("KAGI_API_KEY").ok()
-}
-
-pub fn google_api_key() -> Option<String> {
-    env::var("GOOGLE_API_KEY").ok()
-}
-
-pub fn google_search_engine_id() -> Option<String> {
-    env::var("GOOGLE_SEARCH_ENGINE_ID").ok()
-}
-
-pub fn reddit_client_id() -> Option<String> {
-    env::var("REDDIT_CLIENT_ID").ok()
-}
-
-pub fn reddit_client_secret() -> Option<String> {
-    env::var("REDDIT_CLIENT_SECRET").ok()
-}
-
-pub fn reddit_user_agent() -> Option<String> {
-    env::var("REDDIT_USER_AGENT").ok()
-}
-
-pub fn serpapi_api_key() -> Option<String> {
-    env::var("SERPAPI_API_KEY").ok()
-}
-
-pub fn brightdata_username() -> Option<String> {
-    env::var("BRIGHTDATA_USERNAME").ok()
-}
-
-pub fn brightdata_password() -> Option<String> {
-    env::var("BRIGHTDATA_PASSWORD").ok()
-}
-
-pub fn exa_api_key() -> Option<String> {
-    env::var("EXA_API_KEY").ok()
-}
-
-// AI provider API keys
-pub fn perplexity_api_key() -> Option<String> {
-    env::var("PERPLEXITY_API_KEY").ok()
-}
-
-// Content processing API keys
-pub fn jina_ai_api_key() -> Option<String> {
-    env::var("JINA_AI_API_KEY").ok()
-}
-
-pub fn firecrawl_api_key() -> Option<String> {
-    env::var("FIRECRAWL_API_KEY").ok()
-}
-
-pub fn firecrawl_base_url() -> Option<String> {
-    env::var("FIRECRAWL_BASE_URL").ok()
-}
-
-// Provider configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub search: SearchConfig,
-    pub ai_response: AiResponseConfig,
-    pub processing: ProcessingConfig,
-    pub enhancement: EnhancementConfig,
+    pub server: ServerConfig,
+    pub cache: CacheConfig,
+    pub rate_limiting: RateLimitingConfig,
+    pub metrics: MetricsConfig,
+    pub logging: LoggingConfig,
+    pub providers: ProvidersConfig,
+    pub circuit_breaker: CircuitBreakerConfig,
 }
 
-pub struct SearchConfig {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+    pub max_connections: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CacheConfig {
+    pub enabled: bool,
+    #[serde(rename = "type")]
+    pub cache_type: CacheType,
+    pub ttl_seconds: u64,
+    pub max_entries: usize,
+    pub redis: RedisConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CacheType {
+    Memory,
+    Redis,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RedisConfig {
+    pub url: String,
+    pub pool_size: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RateLimitingConfig {
+    pub enabled: bool,
+    pub requests_per_minute: u64,
+    pub burst_size: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MetricsConfig {
+    pub enabled: bool,
+    pub prometheus_port: u16,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LoggingConfig {
+    pub level: String,
+    pub json_format: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CircuitBreakerConfig {
+    pub enabled: bool,
+    pub failure_threshold: u32,
+    pub timeout_seconds: u64,
+    pub half_open_max_calls: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProvidersConfig {
     pub tavily: ProviderConfig,
-    pub brave: ProviderConfig,
-    pub kagi: ProviderConfig,
     pub google: GoogleProviderConfig,
     pub reddit: RedditProviderConfig,
     pub duckduckgo: ProviderConfig,
     pub baidu: ProviderConfig,
     pub brightdata: BrightDataProviderConfig,
     pub exa: ProviderConfig,
-}
-
-pub struct AiResponseConfig {
+    pub brave: ProviderConfig,
+    pub kagi: ProviderConfig,
     pub perplexity: ProviderConfig,
-    pub kagi_fastgpt: ProviderConfig,
+    pub jina: ProviderConfig,
+    pub firecrawl: ProviderConfig,
 }
 
-pub struct ProcessingConfig {
-    pub jina_reader: ProviderConfig,
-    pub kagi_summarizer: ProviderConfig,
-    pub tavily_extract: ProviderConfig,
-    pub firecrawl_scrape: ProviderConfig,
-    pub firecrawl_crawl: ProviderConfig,
-    pub firecrawl_map: ProviderConfig,
-    pub firecrawl_extract: ProviderConfig,
-    pub firecrawl_actions: ProviderConfig,
-}
-
-pub struct EnhancementConfig {
-    pub kagi_enrichment: ProviderConfig,
-    pub jina_grounding: ProviderConfig,
-}
-
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderConfig {
+    pub enabled: bool,
     pub api_key: Option<String>,
-    pub base_url: String,
-    pub timeout: u64,
+    pub rate_limit: u32,
+    pub timeout_seconds: u64,
+    pub base_url: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GoogleProviderConfig {
+    pub enabled: bool,
     pub api_key: Option<String>,
     pub search_engine_id: Option<String>,
-    pub base_url: String,
-    pub timeout: u64,
+    pub rate_limit: u32,
+    pub timeout_seconds: u64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RedditProviderConfig {
+    pub enabled: bool,
     pub client_id: Option<String>,
     pub client_secret: Option<String>,
     pub user_agent: Option<String>,
-    pub base_url: String,
-    pub timeout: u64,
+    pub rate_limit: u32,
+    pub timeout_seconds: u64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BrightDataProviderConfig {
+    pub enabled: bool,
     pub username: Option<String>,
     pub password: Option<String>,
-    pub base_url: String,
-    pub timeout: u64,
+    pub rate_limit: u32,
+    pub timeout_seconds: u64,
 }
 
 impl Default for Config {
