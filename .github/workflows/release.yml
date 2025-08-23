@@ -32,6 +32,54 @@ jobs:
             echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
           fi
       
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION="v${{ steps.get_version.outputs.version }}"
+          
+          # Get commits since last release
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null | head -1 || echo "")
+          if [ -n "$LAST_TAG" ] && [ "$LAST_TAG" != "$VERSION" ]; then
+            COMMITS=$(git log ${LAST_TAG}..HEAD --oneline --pretty=format:"- %s" | head -20)
+          else
+            COMMITS=$(git log --oneline --pretty=format:"- %s" | head -10)
+          fi
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          ## 🚀 What's New in $VERSION
+          
+          ### Changes
+          $COMMITS
+          
+          ### 📦 Installation
+          
+          #### Download Pre-built Binaries
+          Choose the appropriate binary for your platform from the assets below.
+          
+          #### Install via Cargo
+          \`\`\`bash
+          cargo install omnisearch-mcp
+          \`\`\`
+          
+          #### Build from Source
+          \`\`\`bash
+          git clone https://github.com/${{ github.repository }}.git
+          cd rust-omnisearch-mcp
+          cargo build --release
+          \`\`\`
+          
+          ### 🔧 Usage
+          
+          After installation, you can use omnisearch-mcp as an MCP server with Claude Desktop or other MCP-compatible clients.
+          
+          ### 📋 Full Changelog
+          
+          For detailed changes, see the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md).
+          EOF
+          
+          echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
+          
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -39,27 +87,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
-          name: Release v${{ steps.get_version.outputs.version }}
+          name: "🎉 Release v${{ steps.get_version.outputs.version }}"
+          body_path: ${{ steps.release_notes.outputs.release_notes_file }}
           draft: false
           prerelease: false
-          body: |
-            ## What's Changed
-            
-            Please see the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
-            
-            ## Installation
-            
-            ### Cargo
-            ```bash
-            cargo install omnisearch-mcp
-            ```
-            
-            ### From Source
-            ```bash
-            git clone https://github.com/${{ github.repository }}.git
-            cd rust-omnisearch-mcp
-            cargo build --release
-            ```
+          generate_release_notes: true
+          make_latest: true
 
   build-and-upload:
     name: Build and Upload
@@ -115,13 +148,28 @@ jobs:
           cargo build --release --target ${{ matrix.target }}
         shell: bash
       
+      - name: Prepare Asset
+        run: |
+          mkdir -p assets
+          cp ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }} assets/${{ matrix.asset_name }}
+          
+          # Create checksums
+          cd assets
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
+          elif command -v shasum >/dev/null 2>&1; then
+            shasum -a 256 ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
+          fi
+        
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          files: |
+            assets/${{ matrix.asset_name }}
+            assets/${{ matrix.asset_name }}.sha256
 
   publish-crate:
     name: Publish to crates.io
