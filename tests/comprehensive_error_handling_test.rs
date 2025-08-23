@@ -214,7 +214,7 @@ fn test_provider_error_display_formatting() {
 
     for error_type in error_types {
         let error = ProviderError {
-            error_type: error_type,
+            error_type,
             message: "Test error message".to_string(),
             provider: "test-provider".to_string(),
             source: None,

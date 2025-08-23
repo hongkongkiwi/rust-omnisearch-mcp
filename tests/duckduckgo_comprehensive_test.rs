@@ -1,7 +1,7 @@
 //! Comprehensive tests for DuckDuckGo provider to increase coverage
 
 use omnisearch_mcp::{
-    common::types::{BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult},
+    common::types::{BaseSearchParams, ErrorType, SearchProvider},
     providers::duckduckgo::DuckDuckGoSearchProvider,
 };
 

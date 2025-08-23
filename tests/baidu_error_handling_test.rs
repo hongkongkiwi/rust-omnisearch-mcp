@@ -97,7 +97,7 @@ async fn test_baidu_provider_empty_query_handling() {
         }
         Err(e) => {
             // Empty query might cause an error, which is fine
-            assert!(e.message.len() > 0);
+            assert!(!e.message.is_empty());
         }
     }
 }

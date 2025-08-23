@@ -1,9 +1,5 @@
 //! Tests for server components to increase coverage
 
-use omnisearch_mcp::{
-    common::types::{BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult},
-    server::{handlers::*, tools::*},
-};
 
 #[test]
 fn test_server_module_compilation() {

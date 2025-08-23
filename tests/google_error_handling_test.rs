@@ -62,7 +62,7 @@ async fn test_google_provider_invalid_parameters() {
         }
         Err(e) => {
             // Invalid parameters might cause errors, which is fine
-            assert!(e.message.len() > 0);
+            assert!(!e.message.is_empty());
         }
     }
 }
@@ -87,7 +87,7 @@ async fn test_google_provider_extreme_limits() {
         }
         Err(e) => {
             // Might hit API limits, which is fine
-            assert!(e.message.len() > 0);
+            assert!(!e.message.is_empty());
         }
     }
 }

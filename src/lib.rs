@@ -124,7 +124,7 @@ mod tests {
     fn test_config_loading() {
         // This test will pass if the config loads without panicking
         let _config = &*config::CONFIG;
-        assert!(true);
+        // Config loading test - always passes if we get here
     }
 
     #[test]

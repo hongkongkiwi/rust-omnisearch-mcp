@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::RwLock;
 
 // Track available providers by category
-pub static AVAILABLE_PROVIDERS: Lazy<AvailableProviders> = Lazy::new(|| AvailableProviders::new());
+pub static AVAILABLE_PROVIDERS: Lazy<AvailableProviders> = Lazy::new(AvailableProviders::new);
 
 pub struct AvailableProviders {
     pub search: RwLock<std::collections::HashSet<String>>,

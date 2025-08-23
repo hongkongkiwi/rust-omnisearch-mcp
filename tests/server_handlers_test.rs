@@ -1,7 +1,5 @@
 //! Tests for server handlers
 
-use omnisearch_mcp::common::types::SearchProvider;
-use omnisearch_mcp::server::handlers::*;
 
 #[test]
 fn test_server_handler_module_exists() {

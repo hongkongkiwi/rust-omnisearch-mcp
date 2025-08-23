@@ -52,7 +52,7 @@ fn test_available_providers_thread_safety() {
             }
             {
                 let search = AVAILABLE_PROVIDERS.search.read().unwrap();
-                assert!(search.len() > 0);
+                assert!(!search.is_empty());
             }
         });
         handles.push(handle);
