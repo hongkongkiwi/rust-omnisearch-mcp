@@ -2,9 +2,14 @@
 
 use omnisearch_mcp::config::*;
 use std::env;
+use std::sync::Mutex;
+
+// Global mutex to synchronize environment variable tests
+static ENV_TEST_MUTEX: Mutex<()> = Mutex::new(());
 
 #[test]
 fn test_config_creation_with_no_env_vars() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Clear all environment variables
     let keys_to_clear = vec![
         "TAVILY_API_KEY",
@@ -70,6 +75,7 @@ fn test_config_creation_with_no_env_vars() {
 
 #[test]
 fn test_config_creation_with_all_env_vars() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Set all environment variables
     let test_values = vec![
         ("TAVILY_API_KEY", "test-tavily-key"),
@@ -230,6 +236,7 @@ fn test_config_base_urls_are_valid() {
 
 #[test]
 fn test_individual_env_var_getters() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Test all individual getter functions
     env::set_var("TAVILY_API_KEY", "test-value");
     assert_eq!(tavily_api_key(), Some("test-value".to_string()));
@@ -304,6 +311,7 @@ fn test_individual_env_var_getters() {
 
 #[test]
 fn test_validate_config_with_no_keys() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Clear all environment variables
     let keys_to_clear = vec![
         "TAVILY_API_KEY",
@@ -343,6 +351,7 @@ fn test_validate_config_with_no_keys() {
 
 #[test]
 fn test_validate_config_with_some_keys() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Set only some keys
     let keys_to_set = vec![
         ("TAVILY_API_KEY", "test-tavily"),
@@ -404,6 +413,7 @@ fn test_duckduckgo_no_api_key_required() {
 
 #[test]
 fn test_firecrawl_base_url_customization() {
+    let _guard = ENV_TEST_MUTEX.lock().unwrap();
     // Test without custom base URL
     env::remove_var("FIRECRAWL_BASE_URL");
     let config1 = Config::new();
