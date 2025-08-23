@@ -1,6 +1,5 @@
 //! Tests for server handlers
 
-
 #[test]
 fn test_server_handler_module_exists() {
     // Test that the server handlers module exists and can be imported

@@ -1,6 +1,5 @@
 //! Tests for server components to increase coverage
 
-
 #[test]
 fn test_server_module_compilation() {
     // Test that server modules compile without errors

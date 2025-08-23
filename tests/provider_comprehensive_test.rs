@@ -20,13 +20,15 @@ fn test_all_provider_construction() {
     let exa = ExaSearchProvider::new();
 
     // Verify all providers have unique names
-    let names = [tavily.name(),
+    let names = [
+        tavily.name(),
         google.name(),
         reddit.name(),
         duckduckgo.name(),
         baidu.name(),
         brightdata.name(),
-        exa.name()];
+        exa.name(),
+    ];
 
     let unique_names: std::collections::HashSet<_> = names.iter().collect();
     assert_eq!(
