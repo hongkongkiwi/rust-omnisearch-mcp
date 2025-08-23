@@ -42,7 +42,7 @@ pub enum CacheType {
     Redis,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct RedisConfig {
     pub url: String,
     pub pool_size: u32,
@@ -126,6 +126,7 @@ pub struct BrightDataProviderConfig {
     pub password: Option<String>,
     pub rate_limit: u32,
     pub timeout_seconds: u64,
+    pub base_url: Option<String>,
 }
 
 impl Default for Config {
@@ -215,6 +216,7 @@ impl Default for ProvidersConfig {
                 password: std::env::var("BRIGHTDATA_PASSWORD").ok(),
                 rate_limit: 100,
                 timeout_seconds: 30,
+                base_url: Some("https://api.brightdata.com".to_string()),
             },
             exa: ProviderConfig {
                 enabled: true,

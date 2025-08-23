@@ -4,12 +4,12 @@ use std::{
     collections::HashMap,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 
 use crate::{
     common::{
         cache::get_cache_manager, circuit_breaker::get_circuit_breaker_stats,
-        metrics::METRICS_COLLECTOR, rate_limiter::get_limiter_stats,
+        metrics::METRICS_COLLECTOR,
     },
     config::CONFIG,
 };

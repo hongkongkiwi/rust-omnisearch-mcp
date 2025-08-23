@@ -1,4 +1,4 @@
-use anyhow::Result;
+use eyre::Result;
 use async_trait::async_trait;
 use omnisearch_mcp::{config::validate_config, providers::initialize_providers};
 use rust_mcp_sdk::schema::{
@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
 
     // Create std transport with default options
     let transport = StdioTransport::new(TransportOptions::default())
-        .map_err(|e| anyhow::anyhow!("Failed to create transport: {}", e))?;
+        .map_err(|e| eyre::eyre!("Failed to create transport: {}", e))?;
 
     // Instantiate our custom handler for handling MCP messages
     let handler = OmnisearchServerHandler {};

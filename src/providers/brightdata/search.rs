@@ -90,7 +90,7 @@ impl SearchProvider for BrightDataSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", "https://api.brightdata.com/serp"))
+            .get(format!("{}/search", CONFIG.providers.brightdata.base_url.as_deref().unwrap_or("https://api.brightdata.com/serp")))
             .basic_auth(username, Some(password))
             .query(&query_params)
             .send()

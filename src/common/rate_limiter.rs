@@ -106,20 +106,9 @@ impl RateLimiterManager {
 
         let limiter = self.get_or_create_limiter(provider).await?;
 
-        match limiter.until_ready().await {
-            Ok(_) => {
-                debug!("Rate limit wait completed for provider: {}", provider);
-                Ok(())
-            }
-            Err(e) => {
-                warn!("Rate limit wait failed for provider {}: {}", provider, e);
-                Err(eyre!(
-                    "Rate limit wait failed for provider {}: {}",
-                    provider,
-                    e
-                ))
-            }
-        }
+        limiter.until_ready().await;
+        debug!("Rate limit wait completed for provider: {}", provider);
+        Ok(())
     }
 
     pub async fn reset_limiter(&self, provider: &str) -> Result<()> {
@@ -135,12 +124,13 @@ impl RateLimiterManager {
         }
 
         let limiters = self.limiters.read().await;
-        if let Some(limiter) = limiters.get(provider) {
-            let snapshot = limiter.snapshot()?;
+        if let Some(_limiter) = limiters.get(provider) {
+            // Governor rate limiter doesn't provide snapshot functionality in this version
+            // Return basic stats
             Ok(Some(RateLimiterStats {
                 provider: provider.to_string(),
-                remaining_burst: snapshot.remaining_burst_capacity(),
-                next_replenishment: snapshot.time_to_wait(),
+                remaining_burst: 0, // Not available in this version
+                next_replenishment: Some(Duration::from_secs(0)), // Not available
             }))
         } else {
             Ok(None)

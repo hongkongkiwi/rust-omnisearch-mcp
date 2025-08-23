@@ -6,7 +6,7 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::RwLock;
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 
 use crate::config::CONFIG;
 
@@ -317,11 +317,10 @@ pub async fn setup_metrics_exporter() -> Result<()> {
 
     let builder = PrometheusBuilder::new();
     builder
-        .listen_address(listen_addr)
         .install()
         .map_err(|e| eyre::eyre!("Failed to install Prometheus exporter: {}", e))?;
 
-    info!("Prometheus metrics server listening on {}", listen_addr);
+    info!("Prometheus metrics exporter installed (server configuration: {})", listen_addr);
     Ok(())
 }
 

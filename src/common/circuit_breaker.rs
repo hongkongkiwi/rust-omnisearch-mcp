@@ -6,7 +6,7 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::RwLock;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info, warn};
 
 use crate::config::CONFIG;
 
@@ -262,7 +262,7 @@ impl CircuitBreakerManager {
         // Instead, we'll use a different approach
         drop(breakers);
 
-        let breakers = self.breakers.read().await;
+        let _breakers = self.breakers.read().await;
         // We'll need to restructure this - for now, let's use a different approach
         Arc::new(RwLock::new(CircuitBreaker::new(
             self.failure_threshold,

@@ -4,8 +4,6 @@ use moka::future::Cache as MokaCache;
 use std::time::Duration;
 use tracing::{debug, error, info};
 
-#[cfg(feature = "caching")]
-use redis::aio::ConnectionManager;
 
 use crate::common::types::SearchResult;
 use crate::config::{CacheConfig, CacheType, CONFIG};
@@ -75,7 +73,7 @@ impl CacheProvider for MemoryCache {
 
 #[cfg(feature = "caching")]
 pub struct RedisCache {
-    connection_manager: ConnectionManager,
+    client: redis::Client,
     ttl: Duration,
 }
 
@@ -85,12 +83,11 @@ impl RedisCache {
         use redis::Client;
 
         let client = Client::open(config.redis.url.as_str())?;
-        let connection_manager = ConnectionManager::new(client).await?;
 
         info!("Connected to Redis cache at: {}", config.redis.url);
 
         Ok(Self {
-            connection_manager,
+            client,
             ttl: Duration::from_secs(config.ttl_seconds),
         })
     }
@@ -102,7 +99,7 @@ impl CacheProvider for RedisCache {
     async fn get(&self, key: &str) -> Result<Option<CacheValue>> {
         use redis::AsyncCommands;
 
-        let mut conn = self.connection_manager.clone();
+        let mut conn = self.client.get_async_connection().await?;
         let cached_data: Option<String> = conn.get(key).await?;
 
         match cached_data {
@@ -130,7 +127,7 @@ impl CacheProvider for RedisCache {
     async fn set(&self, key: &str, value: CacheValue, ttl: Duration) -> Result<()> {
         use redis::AsyncCommands;
 
-        let mut conn = self.connection_manager.clone();
+        let mut conn = self.client.get_async_connection().await?;
         let serialized = serde_json::to_string(&value)?;
 
         let _: () = conn.set_ex(key, serialized, ttl.as_secs()).await?;
@@ -141,25 +138,21 @@ impl CacheProvider for RedisCache {
     async fn delete(&self, key: &str) -> Result<()> {
         use redis::AsyncCommands;
 
-        let mut conn = self.connection_manager.clone();
+        let mut conn = self.client.get_async_connection().await?;
         let _: () = conn.del(key).await?;
         debug!("Removed cache entry for key: {}", key);
         Ok(())
     }
 
     async fn clear(&self) -> Result<()> {
-        use redis::AsyncCommands;
-
-        let mut conn = self.connection_manager.clone();
-        let _: () = conn.flushall().await?;
+        let mut conn = self.client.get_async_connection().await?;
+        redis::cmd("FLUSHALL").query_async::<_, ()>(&mut conn).await?;
         info!("Cleared Redis cache");
         Ok(())
     }
 
     async fn size(&self) -> Result<usize> {
-        use redis::AsyncCommands;
-
-        let mut conn = self.connection_manager.clone();
+        let mut conn = self.client.get_async_connection().await?;
         let dbsize: usize = redis::cmd("DBSIZE").query_async(&mut conn).await?;
         Ok(dbsize)
     }
@@ -254,22 +247,24 @@ impl CacheManager {
 }
 
 // Global cache manager instance
-use once_cell::sync::OnceCell;
+use std::sync::Arc;
+use tokio::sync::OnceCell as TokioOnceCell;
 
-static CACHE_MANAGER: OnceCell<CacheManager> = OnceCell::new();
+static CACHE_MANAGER: TokioOnceCell<Arc<CacheManager>> = TokioOnceCell::const_new();
 
-pub async fn get_cache_manager() -> &'static CacheManager {
+pub async fn get_cache_manager() -> Arc<CacheManager> {
     CACHE_MANAGER
         .get_or_init(|| async {
-            CacheManager::new().await.unwrap_or_else(|e| {
+            Arc::new(CacheManager::new().await.unwrap_or_else(|e| {
                 error!("Failed to initialize cache manager: {}", e);
                 CacheManager {
                     provider: Box::new(MemoryCache::new(&CONFIG.cache)),
                     enabled: false,
                 }
-            })
+            }))
         })
         .await
+        .clone()
 }
 
 #[cfg(test)]
