@@ -1,6 +1,6 @@
+use eyre;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use eyre;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {

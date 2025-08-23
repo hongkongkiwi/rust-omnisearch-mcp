@@ -1,5 +1,5 @@
-use eyre::Result;
 use async_trait::async_trait;
+use eyre::Result;
 use omnisearch_mcp::{config::validate_config, providers::initialize_providers};
 use rust_mcp_sdk::schema::{
     schema_utils::CallToolError, CallToolRequest, CallToolResult, Implementation, InitializeResult,

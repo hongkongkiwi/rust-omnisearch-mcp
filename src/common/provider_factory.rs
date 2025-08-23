@@ -19,7 +19,8 @@ impl ProviderFactory {
         }
 
         // Google Custom Search provider
-        if CONFIG.providers.google.api_key.is_some() && CONFIG.providers.google.search_engine_id.is_some()
+        if CONFIG.providers.google.api_key.is_some()
+            && CONFIG.providers.google.search_engine_id.is_some()
         {
             providers.push(Box::new(
                 crate::providers::google::GoogleCustomSearchProvider::new(),

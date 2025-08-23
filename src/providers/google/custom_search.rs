@@ -95,7 +95,10 @@ impl SearchProvider for GoogleCustomSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", "https://www.googleapis.com/customsearch/v1"))
+            .get(format!(
+                "{}/search",
+                "https://www.googleapis.com/customsearch/v1"
+            ))
             .query(&query_params)
             .send()
             .await

@@ -32,7 +32,9 @@ impl Default for BrightDataSearchProvider {
 impl BrightDataSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.providers.brightdata.timeout_seconds * 1000))
+            .timeout(Duration::from_millis(
+                CONFIG.providers.brightdata.timeout_seconds * 1000,
+            ))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -51,23 +53,33 @@ impl SearchProvider for BrightDataSearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let username = CONFIG.providers.brightdata.username.as_ref().ok_or_else(|| {
-            ProviderError::new(
-                ErrorType::ApiError,
-                "Missing Bright Data username".to_string(),
-                self.name().to_string(),
-                None,
-            )
-        })?;
+        let username = CONFIG
+            .providers
+            .brightdata
+            .username
+            .as_ref()
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ErrorType::ApiError,
+                    "Missing Bright Data username".to_string(),
+                    self.name().to_string(),
+                    None,
+                )
+            })?;
 
-        let password = CONFIG.providers.brightdata.password.as_ref().ok_or_else(|| {
-            ProviderError::new(
-                ErrorType::ApiError,
-                "Missing Bright Data password".to_string(),
-                self.name().to_string(),
-                None,
-            )
-        })?;
+        let password = CONFIG
+            .providers
+            .brightdata
+            .password
+            .as_ref()
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ErrorType::ApiError,
+                    "Missing Bright Data password".to_string(),
+                    self.name().to_string(),
+                    None,
+                )
+            })?;
 
         // Prepare query parameters
         let limit_str = params.limit.unwrap_or(5).to_string();
@@ -90,7 +102,15 @@ impl SearchProvider for BrightDataSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.providers.brightdata.base_url.as_deref().unwrap_or("https://api.brightdata.com/serp")))
+            .get(format!(
+                "{}/search",
+                CONFIG
+                    .providers
+                    .brightdata
+                    .base_url
+                    .as_deref()
+                    .unwrap_or("https://api.brightdata.com/serp")
+            ))
             .basic_auth(username, Some(password))
             .query(&query_params)
             .send()

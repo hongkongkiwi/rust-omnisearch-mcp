@@ -60,7 +60,15 @@ impl SearchProvider for DuckDuckGoSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.providers.duckduckgo.base_url.as_deref().unwrap_or("https://api.duckduckgo.com")))
+            .get(format!(
+                "{}/search",
+                CONFIG
+                    .providers
+                    .duckduckgo
+                    .base_url
+                    .as_deref()
+                    .unwrap_or("https://api.duckduckgo.com")
+            ))
             .query(&query_params)
             .send()
             .await

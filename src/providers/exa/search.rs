@@ -92,7 +92,15 @@ impl SearchProvider for ExaSearchProvider {
         // Make the request
         let response = self
             .client
-            .post(format!("{}/search", CONFIG.providers.exa.base_url.as_deref().unwrap_or("https://api.exa.ai")))
+            .post(format!(
+                "{}/search",
+                CONFIG
+                    .providers
+                    .exa
+                    .base_url
+                    .as_deref()
+                    .unwrap_or("https://api.exa.ai")
+            ))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

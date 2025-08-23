@@ -105,9 +105,11 @@ impl MetricsCollector {
         counter!("omnisearch_requests_total", "provider" => provider.clone()).increment(1);
 
         if metrics.success {
-            counter!("omnisearch_requests_successful_total", "provider" => provider.clone()).increment(1);
+            counter!("omnisearch_requests_successful_total", "provider" => provider.clone())
+                .increment(1);
         } else {
-            counter!("omnisearch_requests_failed_total", "provider" => provider.clone()).increment(1);
+            counter!("omnisearch_requests_failed_total", "provider" => provider.clone())
+                .increment(1);
         }
 
         if metrics.cache_hit {
@@ -116,10 +118,12 @@ impl MetricsCollector {
             counter!("omnisearch_cache_misses_total", "provider" => provider.clone()).increment(1);
         }
 
-        histogram!("omnisearch_request_duration_seconds", "provider" => provider.clone()).record(duration_seconds);
+        histogram!("omnisearch_request_duration_seconds", "provider" => provider.clone())
+            .record(duration_seconds);
 
         if let Some(size) = metrics.response_size {
-            histogram!("omnisearch_response_size_bytes", "provider" => provider.clone()).record(size as f64);
+            histogram!("omnisearch_response_size_bytes", "provider" => provider.clone())
+                .record(size as f64);
         }
 
         // Update internal stats
@@ -171,7 +175,8 @@ impl MetricsCollector {
             return;
         }
 
-        gauge!("omnisearch_rate_limiter_remaining", "provider" => provider.to_string()).set(remaining as f64);
+        gauge!("omnisearch_rate_limiter_remaining", "provider" => provider.to_string())
+            .set(remaining as f64);
     }
 
     pub async fn get_provider_stats(&self, provider: &str) -> Option<ProviderStats> {
@@ -320,7 +325,10 @@ pub async fn setup_metrics_exporter() -> Result<()> {
         .install()
         .map_err(|e| eyre::eyre!("Failed to install Prometheus exporter: {}", e))?;
 
-    info!("Prometheus metrics exporter installed (server configuration: {})", listen_addr);
+    info!(
+        "Prometheus metrics exporter installed (server configuration: {})",
+        listen_addr
+    );
     Ok(())
 }
 

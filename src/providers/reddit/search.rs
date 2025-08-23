@@ -44,7 +44,9 @@ impl Default for RedditSearchProvider {
 impl RedditSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.providers.reddit.timeout_seconds * 1000))
+            .timeout(Duration::from_millis(
+                CONFIG.providers.reddit.timeout_seconds * 1000,
+            ))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -76,14 +78,19 @@ impl SearchProvider for RedditSearchProvider {
             )
         })?;
 
-        let client_secret = CONFIG.providers.reddit.client_secret.as_ref().ok_or_else(|| {
-            ProviderError::new(
-                ErrorType::ApiError,
-                "Missing Reddit client secret".to_string(),
-                self.name().to_string(),
-                None,
-            )
-        })?;
+        let client_secret = CONFIG
+            .providers
+            .reddit
+            .client_secret
+            .as_ref()
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ErrorType::ApiError,
+                    "Missing Reddit client secret".to_string(),
+                    self.name().to_string(),
+                    None,
+                )
+            })?;
 
         let user_agent = CONFIG.providers.reddit.user_agent.as_ref().ok_or_else(|| {
             ProviderError::new(

@@ -32,7 +32,9 @@ impl Default for BaiduSearchProvider {
 impl BaiduSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.providers.baidu.timeout_seconds * 1000))
+            .timeout(Duration::from_millis(
+                CONFIG.providers.baidu.timeout_seconds * 1000,
+            ))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -75,7 +77,15 @@ impl SearchProvider for BaiduSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.providers.baidu.base_url.as_deref().unwrap_or("https://serpapi.com")))
+            .get(format!(
+                "{}/search",
+                CONFIG
+                    .providers
+                    .baidu
+                    .base_url
+                    .as_deref()
+                    .unwrap_or("https://serpapi.com")
+            ))
             .query(&query_params)
             .send()
             .await

@@ -34,7 +34,9 @@ impl Default for TavilySearchProvider {
 impl TavilySearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.providers.tavily.timeout_seconds * 1000))
+            .timeout(Duration::from_millis(
+                CONFIG.providers.tavily.timeout_seconds * 1000,
+            ))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -105,7 +107,15 @@ impl SearchProvider for TavilySearchProvider {
         // Make the request
         let response = self
             .client
-            .post(format!("{}/search", CONFIG.providers.tavily.base_url.as_ref().unwrap_or(&"https://api.tavily.com".to_string())))
+            .post(format!(
+                "{}/search",
+                CONFIG
+                    .providers
+                    .tavily
+                    .base_url
+                    .as_ref()
+                    .unwrap_or(&"https://api.tavily.com".to_string())
+            ))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

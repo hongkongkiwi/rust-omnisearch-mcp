@@ -4,7 +4,6 @@ use moka::future::Cache as MokaCache;
 use std::time::Duration;
 use tracing::{debug, error, info};
 
-
 use crate::common::types::SearchResult;
 use crate::config::{CacheConfig, CacheType, CONFIG};
 
@@ -146,7 +145,9 @@ impl CacheProvider for RedisCache {
 
     async fn clear(&self) -> Result<()> {
         let mut conn = self.client.get_async_connection().await?;
-        redis::cmd("FLUSHALL").query_async::<_, ()>(&mut conn).await?;
+        redis::cmd("FLUSHALL")
+            .query_async::<_, ()>(&mut conn)
+            .await?;
         info!("Cleared Redis cache");
         Ok(())
     }
