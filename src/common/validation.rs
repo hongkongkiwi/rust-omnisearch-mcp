@@ -30,7 +30,7 @@ lazy_static::lazy_static! {
         Regex::new(r"(?i)vbscript:").unwrap(), // VBScript
         Regex::new(r"(?i)on\w+\s*=").unwrap(), // Event handlers
         Regex::new(r"\b(union|select|insert|delete|update|drop|create|alter|exec|execute)\b").unwrap(), // SQL injection
-        Regex::new(r"[<>\"'&]").unwrap(), // HTML special characters
+        Regex::new(r#"[<>"'&]"#).unwrap(), // HTML special characters
     ];
     
     // Common malicious or problematic query patterns

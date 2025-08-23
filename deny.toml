@@ -1,0 +1,106 @@
+[graph]
+# Dependency graph checking
+
+# Warns on duplicate dependencies with different versions.
+# Duplicates are allowed for the following dependencies:
+# - syn: popular for codegen crates, often has multiple versions
+# - serde: very stable API, duplicates are usually benign
+all-features = false
+no-default-features = false
+exclude = []
+include = []
+
+[output]
+feature-depth = 1
+
+[advisories]
+# Advisory database checking
+version = 2
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+vulnerability = "deny"
+unmaintained = "warn"
+yanked = "warn"
+notice = "warn"
+ignore = [
+    #"RUSTSEC-0000-0000", # Placeholder for ignored advisories
+]
+
+[licenses]
+# License checking
+version = 2
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "MPL-2.0",
+]
+deny = [
+    "GPL-2.0",
+    "GPL-3.0",
+    "AGPL-3.0",
+]
+copyleft = "warn"
+allow-osi-fsf-free = "neither"
+default = "deny"
+confidence-threshold = 0.8
+
+[[licenses.exceptions]]
+# Some crates don't declare their license in Cargo.toml but have it in LICENSE files
+allow = ["Unicode-DFS-2016"]
+name = "unicode-ident"
+
+[licenses.private]
+ignore = false
+registries = []
+
+[bans]
+# Banned/restricted dependencies
+version = 2
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+allow = [
+    # Allow these specific duplicate versions
+    { name = "syn", version = "*" },
+    { name = "serde", version = "*" },
+    { name = "tokio", version = "*" },
+    { name = "reqwest", version = "*" },
+]
+deny = [
+    # Deny problematic crates
+    { name = "openssl", reason = "Use rustls instead for better security and easier cross-compilation" },
+    { name = "native-tls", reason = "Use rustls instead" },
+    { name = "time", version = "< 0.2.23", reason = "Security vulnerabilities in old versions" },
+]
+
+# Specific feature restrictions
+[[bans.features]]
+name = "tokio"
+deny = ["test-util"]
+reason = "Test utilities should only be used in dev-dependencies"
+
+[[bans.features]]
+name = "serde"
+deny = ["rc"]
+reason = "RC feature can cause memory leaks"
+
+[sources]
+# Source checking - ensure dependencies come from trusted sources
+version = 2
+unknown-registry = "warn"
+unknown-git = "warn"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
+
+[[sources.allow-org]]
+github = ["tokio-rs", "serde-rs", "rust-lang"]
+gitlab = []
+bitbucket = []
