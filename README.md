@@ -17,14 +17,56 @@ The server automatically detects available API keys and enables corresponding pr
 
 ### Installation
 
+Choose your preferred installation method:
+
+#### Option 1: Cargo Install (Recommended for Rust users)
+
 ```bash
-# From source
+# Install the latest version from crates.io
+cargo install omnisearch-mcp
+
+# Update to the latest version
+cargo install omnisearch-mcp --force
+```
+
+#### Option 2: Pre-built Binaries (For everyone else)
+
+Download the appropriate binary for your platform from the [GitHub Releases](https://github.com/hongkongkiwi/rust-omnisearch-mcp/releases):
+
+- **Linux**: `omnisearch-mcp-linux-amd64` or `omnisearch-mcp-linux-arm64`
+- **macOS**: `omnisearch-mcp-macos-amd64` or `omnisearch-mcp-macos-arm64` 
+- **Windows**: `omnisearch-mcp-windows-amd64.exe`
+
+```bash
+# Example for Linux/macOS (make executable and move to PATH)
+chmod +x omnisearch-mcp-*
+sudo mv omnisearch-mcp-* /usr/local/bin/omnisearch-mcp
+
+# Verify installation
+omnisearch-mcp --version
+```
+
+#### Option 3: From Source
+
+```bash
+# Clone and build from source
 git clone https://github.com/hongkongkiwi/rust-omnisearch-mcp.git
 cd rust-omnisearch-mcp
 cargo build --release
 
-# Or using Cargo
-cargo install omnisearch-mcp
+# Binary will be at ./target/release/omnisearch-mcp
+```
+
+#### Option 4: Using as a Library
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+omnisearch-mcp = "0.1"
+
+# Optional: Select only the providers you need
+omnisearch-mcp = { version = "0.1", default-features = false, features = ["tavily", "google"] }
 ```
 
 ### Basic Configuration
@@ -228,12 +270,27 @@ For any MCP-compatible tool, the general configuration pattern is:
 ### Configuration Tips
 
 1. **Path to executable**: 
-   - If installed via cargo: `~/.cargo/bin/omnisearch-mcp`
-   - If built from source: `/path/to/rust-omnisearch-mcp/target/release/omnisearch-mcp`
+   - **Cargo install**: `~/.cargo/bin/omnisearch-mcp` (or just `omnisearch-mcp` if `~/.cargo/bin` is in your PATH)
+   - **Pre-built binary**: `/usr/local/bin/omnisearch-mcp` (or wherever you placed it)
+   - **From source**: `/path/to/rust-omnisearch-mcp/target/release/omnisearch-mcp`
 
-2. **API Keys**: Only include keys for services you want to use. The server automatically enables providers based on available keys.
+2. **Find your installation**: 
+   ```bash
+   # Check if it's in your PATH
+   which omnisearch-mcp
+   
+   # Or find the Cargo installation
+   ls ~/.cargo/bin/omnisearch-mcp
+   ```
 
-3. **Testing**: After configuration, restart your AI coding tool and check if the omnisearch tools appear in the available MCP tools list.
+3. **API Keys**: Only include keys for services you want to use. The server automatically enables providers based on available keys.
+
+4. **Testing**: After configuration, restart your AI coding tool and check if the omnisearch tools appear in the available MCP tools list.
+
+5. **Updates**: 
+   - Cargo: `cargo install omnisearch-mcp --force`
+   - Binary: Download new release and replace existing file
+   - Source: `git pull && cargo build --release`
 
 ## Documentation
 

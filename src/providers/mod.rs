@@ -1,6 +1,11 @@
 use crate::{
-    common::provider_factory::ProviderFactory, config::CONFIG, server::register_search_provider,
+    common::provider_factory::ProviderFactory, config::CONFIG,
 };
+
+#[cfg(feature = "server")]
+use crate::server::register_search_provider;
+
+use crate::common::types::SearchProvider;
 
 // Import search providers
 pub mod baidu;
@@ -11,9 +16,16 @@ pub mod google;
 pub mod reddit;
 pub mod search;
 
+/// Create and return available search providers (for library usage)
+pub fn create_providers() -> Vec<Box<dyn SearchProvider>> {
+    ProviderFactory::create_search_providers()
+}
+
+/// Initialize providers and register them with the MCP server (for server usage)
+#[cfg(feature = "server")]
 pub fn initialize_providers() {
     // Initialize search providers using the factory
-    let search_providers = ProviderFactory::create_search_providers();
+    let search_providers = create_providers();
 
     for provider in search_providers {
         // All our new providers are regular search providers (not AI response providers)
