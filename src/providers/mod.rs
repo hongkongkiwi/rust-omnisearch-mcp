@@ -30,54 +30,42 @@ pub fn initialize_providers() {
         register_search_provider(provider, false);
     }
 
-    // Initialize AI response providers
-    if CONFIG.ai_response.perplexity.api_key.is_some() {
+    // Initialize AI response providers (using appropriate provider configs)
+    if CONFIG.providers.perplexity.api_key.is_some() {
         // register_search_provider(Box::new(PerplexityProvider::new()), true);
     }
 
-    if CONFIG.ai_response.kagi_fastgpt.api_key.is_some() {
+    if CONFIG.providers.kagi.api_key.is_some() {
         // register_search_provider(Box::new(KagiFastGPTProvider::new()), true);
     }
 
-    // Initialize processing providers
-    if CONFIG.processing.jina_reader.api_key.is_some() {
+    // Initialize processing providers (using appropriate provider configs)
+    if CONFIG.providers.jina.api_key.is_some() {
         // register_processing_provider(Box::new(JinaReaderProvider::new()));
     }
 
-    if CONFIG.processing.kagi_summarizer.api_key.is_some() {
+    if CONFIG.providers.kagi.api_key.is_some() {
         // register_processing_provider(Box::new(KagiSummarizerProvider::new()));
     }
 
-    if CONFIG.processing.tavily_extract.api_key.is_some() {
+    if CONFIG.providers.tavily.api_key.is_some() {
         // register_processing_provider(Box::new(TavilyExtractProvider::new()));
     }
 
-    if CONFIG.processing.firecrawl_scrape.api_key.is_some() {
+    if CONFIG.providers.firecrawl.api_key.is_some() {
         // register_processing_provider(Box::new(FirecrawlScrapeProvider::new()));
-    }
-
-    if CONFIG.processing.firecrawl_crawl.api_key.is_some() {
         // register_processing_provider(Box::new(FirecrawlCrawlProvider::new()));
-    }
-
-    if CONFIG.processing.firecrawl_map.api_key.is_some() {
         // register_processing_provider(Box::new(FirecrawlMapProvider::new()));
-    }
-
-    if CONFIG.processing.firecrawl_extract.api_key.is_some() {
         // register_processing_provider(Box::new(FirecrawlExtractProvider::new()));
-    }
-
-    if CONFIG.processing.firecrawl_actions.api_key.is_some() {
         // register_processing_provider(Box::new(FirecrawlActionsProvider::new()));
     }
 
-    // Initialize enhancement providers
-    if CONFIG.enhancement.jina_grounding.api_key.is_some() {
+    // Initialize enhancement providers (using appropriate provider configs)
+    if CONFIG.providers.jina.api_key.is_some() {
         // register_enhancement_provider(Box::new(JinaGroundingProvider::new()));
     }
 
-    if CONFIG.enhancement.kagi_enrichment.api_key.is_some() {
+    if CONFIG.providers.kagi.api_key.is_some() {
         // register_enhancement_provider(Box::new(KagiEnrichmentProvider::new()));
     }
 

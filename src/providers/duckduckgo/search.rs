@@ -31,7 +31,7 @@ impl Default for DuckDuckGoSearchProvider {
 
 impl DuckDuckGoSearchProvider {
     pub fn new() -> Self {
-        let client = create_http_client(CONFIG.search.duckduckgo.timeout);
+        let client = create_http_client(CONFIG.providers.duckduckgo.timeout_seconds * 1000);
         Self { client }
     }
 }
@@ -60,7 +60,7 @@ impl SearchProvider for DuckDuckGoSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.search.duckduckgo.base_url))
+            .get(format!("{}/search", CONFIG.providers.duckduckgo.base_url.as_deref().unwrap_or("https://api.duckduckgo.com")))
             .query(&query_params)
             .send()
             .await

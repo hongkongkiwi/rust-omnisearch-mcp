@@ -32,7 +32,7 @@ impl Default for ExaSearchProvider {
 
 impl ExaSearchProvider {
     pub fn new() -> Self {
-        let client = create_http_client(CONFIG.search.exa.timeout);
+        let client = create_http_client(CONFIG.providers.exa.timeout_seconds * 1000);
         Self { client }
     }
 }
@@ -48,7 +48,7 @@ impl SearchProvider for ExaSearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let api_key = CONFIG.search.exa.api_key.as_ref().ok_or_else(|| {
+        let api_key = CONFIG.providers.exa.api_key.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Exa API key".to_string(),
@@ -92,7 +92,7 @@ impl SearchProvider for ExaSearchProvider {
         // Make the request
         let response = self
             .client
-            .post(format!("{}/search", CONFIG.search.exa.base_url))
+            .post(format!("{}/search", CONFIG.providers.exa.base_url.as_deref().unwrap_or("https://api.exa.ai")))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

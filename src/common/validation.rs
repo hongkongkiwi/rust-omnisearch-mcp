@@ -49,19 +49,19 @@ pub struct ValidatedSearchParams {
         max = 1000,
         message = "Query must be between 1 and 1000 characters"
     ))]
-    #[validate(custom = "validate_query_content")]
+    #[validate(custom(function = "validate_query_content"))]
     pub query: String,
 
     #[validate(range(min = 1, max = 100, message = "Limit must be between 1 and 100"))]
     pub limit: Option<u32>,
 
-    #[validate(custom = "validate_domains")]
+    #[validate(custom(function = "validate_domains"))]
     pub include_domains: Option<Vec<String>>,
 
-    #[validate(custom = "validate_domains")]
+    #[validate(custom(function = "validate_domains"))]
     pub exclude_domains: Option<Vec<String>>,
 
-    #[validate(custom = "validate_urls")]
+    #[validate(custom(function = "validate_urls"))]
     pub urls: Option<Vec<String>>,
 }
 

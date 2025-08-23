@@ -12,14 +12,14 @@ impl ProviderFactory {
         let mut providers: Vec<Box<dyn SearchProvider>> = Vec::new();
 
         // Tavily provider
-        if CONFIG.search.tavily.api_key.is_some() {
+        if CONFIG.providers.tavily.api_key.is_some() {
             providers.push(Box::new(
                 crate::providers::search::TavilySearchProvider::new(),
             ));
         }
 
         // Google Custom Search provider
-        if CONFIG.search.google.api_key.is_some() && CONFIG.search.google.search_engine_id.is_some()
+        if CONFIG.providers.google.api_key.is_some() && CONFIG.providers.google.search_engine_id.is_some()
         {
             providers.push(Box::new(
                 crate::providers::google::GoogleCustomSearchProvider::new(),
@@ -27,9 +27,9 @@ impl ProviderFactory {
         }
 
         // Reddit provider
-        if CONFIG.search.reddit.client_id.is_some()
-            && CONFIG.search.reddit.client_secret.is_some()
-            && CONFIG.search.reddit.user_agent.is_some()
+        if CONFIG.providers.reddit.client_id.is_some()
+            && CONFIG.providers.reddit.client_secret.is_some()
+            && CONFIG.providers.reddit.user_agent.is_some()
         {
             providers.push(Box::new(
                 crate::providers::reddit::RedditSearchProvider::new(),
@@ -42,13 +42,13 @@ impl ProviderFactory {
         ));
 
         // Baidu provider
-        if CONFIG.search.baidu.api_key.is_some() {
+        if CONFIG.providers.baidu.api_key.is_some() {
             providers.push(Box::new(crate::providers::baidu::BaiduSearchProvider::new()));
         }
 
         // Bright Data provider
-        if CONFIG.search.brightdata.username.is_some()
-            && CONFIG.search.brightdata.password.is_some()
+        if CONFIG.providers.brightdata.username.is_some()
+            && CONFIG.providers.brightdata.password.is_some()
         {
             providers.push(Box::new(
                 crate::providers::brightdata::BrightDataSearchProvider::new(),
@@ -56,7 +56,7 @@ impl ProviderFactory {
         }
 
         // Exa provider
-        if CONFIG.search.exa.api_key.is_some() {
+        if CONFIG.providers.exa.api_key.is_some() {
             providers.push(Box::new(crate::providers::exa::ExaSearchProvider::new()));
         }
 

@@ -32,7 +32,7 @@ impl Default for BaiduSearchProvider {
 impl BaiduSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.search.baidu.timeout))
+            .timeout(Duration::from_millis(CONFIG.providers.baidu.timeout_seconds * 1000))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -51,7 +51,7 @@ impl SearchProvider for BaiduSearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let api_key = CONFIG.search.baidu.api_key.as_ref().ok_or_else(|| {
+        let api_key = CONFIG.providers.baidu.api_key.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing SerpApi API key".to_string(),
@@ -75,7 +75,7 @@ impl SearchProvider for BaiduSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.search.baidu.base_url))
+            .get(format!("{}/search", CONFIG.providers.baidu.base_url.as_deref().unwrap_or("https://serpapi.com")))
             .query(&query_params)
             .send()
             .await

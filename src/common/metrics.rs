@@ -155,7 +155,7 @@ impl MetricsCollector {
             return;
         }
 
-        gauge!("omnisearch_cache_size", size as f64);
+        gauge!("omnisearch_cache_size").set(size as f64);
     }
 
     pub async fn record_active_providers(&self, count: usize) {
@@ -163,7 +163,7 @@ impl MetricsCollector {
             return;
         }
 
-        gauge!("omnisearch_active_providers", count as f64);
+        gauge!("omnisearch_active_providers").set(count as f64);
     }
 
     pub async fn record_rate_limiter_remaining(&self, provider: &str, remaining: u32) {
@@ -171,7 +171,7 @@ impl MetricsCollector {
             return;
         }
 
-        gauge!("omnisearch_rate_limiter_remaining", remaining as f64, "provider" => provider.to_string());
+        gauge!("omnisearch_rate_limiter_remaining", "provider" => provider.to_string()).set(remaining as f64);
     }
 
     pub async fn get_provider_stats(&self, provider: &str) -> Option<ProviderStats> {

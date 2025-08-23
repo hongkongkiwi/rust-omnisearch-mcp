@@ -32,7 +32,7 @@ impl Default for BrightDataSearchProvider {
 impl BrightDataSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.search.brightdata.timeout))
+            .timeout(Duration::from_millis(CONFIG.providers.brightdata.timeout_seconds * 1000))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -51,7 +51,7 @@ impl SearchProvider for BrightDataSearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let username = CONFIG.search.brightdata.username.as_ref().ok_or_else(|| {
+        let username = CONFIG.providers.brightdata.username.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Bright Data username".to_string(),
@@ -60,7 +60,7 @@ impl SearchProvider for BrightDataSearchProvider {
             )
         })?;
 
-        let password = CONFIG.search.brightdata.password.as_ref().ok_or_else(|| {
+        let password = CONFIG.providers.brightdata.password.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Bright Data password".to_string(),
@@ -90,7 +90,7 @@ impl SearchProvider for BrightDataSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.search.brightdata.base_url))
+            .get(format!("{}/search", "https://api.brightdata.com/serp"))
             .basic_auth(username, Some(password))
             .query(&query_params)
             .send()

@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use eyre::Result;
 use moka::future::Cache as MokaCache;
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tracing::{debug, error, info};
 
@@ -152,7 +151,7 @@ impl CacheProvider for RedisCache {
         use redis::AsyncCommands;
 
         let mut conn = self.connection_manager.clone();
-        let _: () = conn.cmd("FLUSHALL").query_async(&mut conn).await?;
+        let _: () = conn.flushall().await?;
         info!("Cleared Redis cache");
         Ok(())
     }
@@ -161,8 +160,8 @@ impl CacheProvider for RedisCache {
         use redis::AsyncCommands;
 
         let mut conn = self.connection_manager.clone();
-        let dbsize: u64 = conn.cmd("DBSIZE").query_async(&mut conn).await?;
-        Ok(dbsize as usize)
+        let dbsize: usize = redis::cmd("DBSIZE").query_async(&mut conn).await?;
+        Ok(dbsize)
     }
 }
 

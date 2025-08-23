@@ -34,7 +34,7 @@ impl Default for TavilySearchProvider {
 impl TavilySearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.search.tavily.timeout))
+            .timeout(Duration::from_millis(CONFIG.providers.tavily.timeout_seconds * 1000))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -53,7 +53,7 @@ impl SearchProvider for TavilySearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let api_key = CONFIG.search.tavily.api_key.as_ref().ok_or_else(|| {
+        let api_key = CONFIG.providers.tavily.api_key.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing API key".to_string(),
@@ -105,7 +105,7 @@ impl SearchProvider for TavilySearchProvider {
         // Make the request
         let response = self
             .client
-            .post(format!("{}/search", CONFIG.search.tavily.base_url))
+            .post(format!("{}/search", CONFIG.providers.tavily.base_url.as_ref().unwrap_or(&"https://api.tavily.com".to_string())))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

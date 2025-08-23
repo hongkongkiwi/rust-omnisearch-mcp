@@ -44,7 +44,7 @@ impl Default for RedditSearchProvider {
 impl RedditSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_millis(CONFIG.search.reddit.timeout))
+            .timeout(Duration::from_millis(CONFIG.providers.reddit.timeout_seconds * 1000))
             .build()
             .expect("Failed to create HTTP client");
 
@@ -67,7 +67,7 @@ impl SearchProvider for RedditSearchProvider {
         // In a real implementation, you would need to properly authenticate with Reddit's API
         // using the client credentials flow
 
-        let client_id = CONFIG.search.reddit.client_id.as_ref().ok_or_else(|| {
+        let client_id = CONFIG.providers.reddit.client_id.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Reddit client ID".to_string(),
@@ -76,7 +76,7 @@ impl SearchProvider for RedditSearchProvider {
             )
         })?;
 
-        let client_secret = CONFIG.search.reddit.client_secret.as_ref().ok_or_else(|| {
+        let client_secret = CONFIG.providers.reddit.client_secret.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Reddit client secret".to_string(),
@@ -85,7 +85,7 @@ impl SearchProvider for RedditSearchProvider {
             )
         })?;
 
-        let user_agent = CONFIG.search.reddit.user_agent.as_ref().ok_or_else(|| {
+        let user_agent = CONFIG.providers.reddit.user_agent.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Reddit user agent".to_string(),
@@ -106,7 +106,7 @@ impl SearchProvider for RedditSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.search.reddit.base_url))
+            .get(format!("{}/search", "https://oauth.reddit.com"))
             .header("User-Agent", user_agent)
             .basic_auth(client_id, Some(client_secret))
             .query(&query_params)

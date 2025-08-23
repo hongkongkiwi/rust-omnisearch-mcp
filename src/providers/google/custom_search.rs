@@ -31,7 +31,7 @@ impl Default for GoogleCustomSearchProvider {
 
 impl GoogleCustomSearchProvider {
     pub fn new() -> Self {
-        let client = create_http_client(CONFIG.search.google.timeout);
+        let client = create_http_client(CONFIG.providers.google.timeout_seconds * 1000);
         Self { client }
     }
 }
@@ -47,7 +47,7 @@ impl SearchProvider for GoogleCustomSearchProvider {
     }
 
     async fn search(&self, params: BaseSearchParams) -> Result<Vec<SearchResult>, ProviderError> {
-        let api_key = CONFIG.search.google.api_key.as_ref().ok_or_else(|| {
+        let api_key = CONFIG.providers.google.api_key.as_ref().ok_or_else(|| {
             ProviderError::new(
                 ErrorType::ApiError,
                 "Missing Google API key".to_string(),
@@ -57,7 +57,7 @@ impl SearchProvider for GoogleCustomSearchProvider {
         })?;
 
         let search_engine_id = CONFIG
-            .search
+            .providers
             .google
             .search_engine_id
             .as_ref()
@@ -95,7 +95,7 @@ impl SearchProvider for GoogleCustomSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(format!("{}/search", CONFIG.search.google.base_url))
+            .get(format!("{}/search", "https://www.googleapis.com/customsearch/v1"))
             .query(&query_params)
             .send()
             .await
