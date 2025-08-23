@@ -1,8 +1,11 @@
-use figment::{Figment, providers::{Format, Toml, Yaml, Env}};
+use eyre::{eyre, Result};
+use figment::{
+    providers::{Env, Format, Toml, Yaml},
+    Figment,
+};
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::{path::Path, time::Duration};
-use eyre::{Result, eyre};
-use once_cell::sync::Lazy;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -127,252 +130,274 @@ pub struct BrightDataProviderConfig {
 
 impl Default for Config {
     fn default() -> Self {
-        Self::new()
+        Self {
+            server: ServerConfig {
+                host: "localhost".to_string(),
+                port: 3000,
+                max_connections: 1000,
+            },
+            cache: CacheConfig {
+                enabled: true,
+                cache_type: CacheType::Memory,
+                ttl_seconds: 3600,
+                max_entries: 10000,
+                redis: RedisConfig {
+                    url: "redis://localhost:6379".to_string(),
+                    pool_size: 10,
+                },
+            },
+            rate_limiting: RateLimitingConfig {
+                enabled: true,
+                requests_per_minute: 60,
+                burst_size: 10,
+            },
+            metrics: MetricsConfig {
+                enabled: true,
+                prometheus_port: 9090,
+            },
+            logging: LoggingConfig {
+                level: "info".to_string(),
+                json_format: false,
+            },
+            circuit_breaker: CircuitBreakerConfig {
+                enabled: true,
+                failure_threshold: 5,
+                timeout_seconds: 60,
+                half_open_max_calls: 3,
+            },
+            providers: ProvidersConfig::default(),
+        }
     }
 }
 
-impl Config {
-    pub fn new() -> Self {
+impl Default for ProvidersConfig {
+    fn default() -> Self {
         Self {
-            search: SearchConfig {
-                tavily: ProviderConfig {
-                    api_key: tavily_api_key(),
-                    base_url: "https://api.tavily.com".to_string(),
-                    timeout: 30000,
-                },
-                brave: ProviderConfig {
-                    api_key: brave_api_key(),
-                    base_url: "https://api.search.brave.com/res/v1".to_string(),
-                    timeout: 10000,
-                },
-                kagi: ProviderConfig {
-                    api_key: kagi_api_key(),
-                    base_url: "https://kagi.com/api/v0".to_string(),
-                    timeout: 20000,
-                },
-                google: GoogleProviderConfig {
-                    api_key: google_api_key(),
-                    search_engine_id: google_search_engine_id(),
-                    base_url: "https://www.googleapis.com/customsearch/v1".to_string(),
-                    timeout: 10000,
-                },
-                reddit: RedditProviderConfig {
-                    client_id: reddit_client_id(),
-                    client_secret: reddit_client_secret(),
-                    user_agent: reddit_user_agent(),
-                    base_url: "https://oauth.reddit.com".to_string(),
-                    timeout: 10000,
-                },
-                duckduckgo: ProviderConfig {
-                    api_key: None,
-                    base_url: "https://api.duckduckgo.com".to_string(),
-                    timeout: 10000,
-                },
-                baidu: ProviderConfig {
-                    api_key: serpapi_api_key(),
-                    base_url: "https://serpapi.com".to_string(),
-                    timeout: 10000,
-                },
-                brightdata: BrightDataProviderConfig {
-                    username: brightdata_username(),
-                    password: brightdata_password(),
-                    base_url: "https://api.brightdata.com/serp".to_string(),
-                    timeout: 10000,
-                },
-                exa: ProviderConfig {
-                    api_key: exa_api_key(),
-                    base_url: "https://api.exa.ai".to_string(),
-                    timeout: 10000,
-                },
+            tavily: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("TAVILY_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://api.tavily.com".to_string()),
             },
-            ai_response: AiResponseConfig {
-                perplexity: ProviderConfig {
-                    api_key: perplexity_api_key(),
-                    base_url: "https://api.perplexity.ai".to_string(),
-                    timeout: 60000,
-                },
-                kagi_fastgpt: ProviderConfig {
-                    api_key: kagi_api_key(),
-                    base_url: "https://kagi.com/api/v0/fastgpt".to_string(),
-                    timeout: 30000,
-                },
+            google: GoogleProviderConfig {
+                enabled: true,
+                api_key: std::env::var("GOOGLE_API_KEY").ok(),
+                search_engine_id: std::env::var("GOOGLE_SEARCH_ENGINE_ID").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
             },
-            processing: ProcessingConfig {
-                jina_reader: ProviderConfig {
-                    api_key: jina_ai_api_key(),
-                    base_url: "https://api.jina.ai/v1/reader".to_string(),
-                    timeout: 30000,
-                },
-                kagi_summarizer: ProviderConfig {
-                    api_key: kagi_api_key(),
-                    base_url: "https://kagi.com/api/v0/summarize".to_string(),
-                    timeout: 30000,
-                },
-                tavily_extract: ProviderConfig {
-                    api_key: tavily_api_key(),
-                    base_url: "https://api.tavily.com".to_string(),
-                    timeout: 30000,
-                },
-                firecrawl_scrape: ProviderConfig {
-                    api_key: firecrawl_api_key(),
-                    base_url: firecrawl_base_url()
-                        .unwrap_or_else(|| "https://api.firecrawl.dev/v1/scrape".to_string()),
-                    timeout: 60000,
-                },
-                firecrawl_crawl: ProviderConfig {
-                    api_key: firecrawl_api_key(),
-                    base_url: firecrawl_base_url()
-                        .unwrap_or_else(|| "https://api.firecrawl.dev/v1/crawl".to_string()),
-                    timeout: 120000,
-                },
-                firecrawl_map: ProviderConfig {
-                    api_key: firecrawl_api_key(),
-                    base_url: firecrawl_base_url()
-                        .unwrap_or_else(|| "https://api.firecrawl.dev/v1/map".to_string()),
-                    timeout: 60000,
-                },
-                firecrawl_extract: ProviderConfig {
-                    api_key: firecrawl_api_key(),
-                    base_url: firecrawl_base_url()
-                        .unwrap_or_else(|| "https://api.firecrawl.dev/v1/extract".to_string()),
-                    timeout: 60000,
-                },
-                firecrawl_actions: ProviderConfig {
-                    api_key: firecrawl_api_key(),
-                    base_url: firecrawl_base_url()
-                        .unwrap_or_else(|| "https://api.firecrawl.dev/v1/scrape".to_string()),
-                    timeout: 90000,
-                },
+            reddit: RedditProviderConfig {
+                enabled: true,
+                client_id: std::env::var("REDDIT_CLIENT_ID").ok(),
+                client_secret: std::env::var("REDDIT_CLIENT_SECRET").ok(),
+                user_agent: std::env::var("REDDIT_USER_AGENT").ok(),
+                rate_limit: 60,
+                timeout_seconds: 30,
             },
-            enhancement: EnhancementConfig {
-                kagi_enrichment: ProviderConfig {
-                    api_key: kagi_api_key(),
-                    base_url: "https://kagi.com/api/v0/enrich".to_string(),
-                    timeout: 20000,
-                },
-                jina_grounding: ProviderConfig {
-                    api_key: jina_ai_api_key(),
-                    base_url: "https://api.jina.ai/v1/ground".to_string(),
-                    timeout: 20000,
-                },
+            duckduckgo: ProviderConfig {
+                enabled: true,
+                api_key: None,
+                rate_limit: 30,
+                timeout_seconds: 30,
+                base_url: Some("https://api.duckduckgo.com".to_string()),
+            },
+            baidu: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("SERPAPI_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://serpapi.com".to_string()),
+            },
+            brightdata: BrightDataProviderConfig {
+                enabled: true,
+                username: std::env::var("BRIGHTDATA_USERNAME").ok(),
+                password: std::env::var("BRIGHTDATA_PASSWORD").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+            },
+            exa: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("EXA_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://api.exa.ai".to_string()),
+            },
+            brave: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("BRAVE_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://api.search.brave.com/res/v1".to_string()),
+            },
+            kagi: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("KAGI_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://kagi.com/api/v0".to_string()),
+            },
+            perplexity: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("PERPLEXITY_API_KEY").ok(),
+                rate_limit: 60,
+                timeout_seconds: 60,
+                base_url: Some("https://api.perplexity.ai".to_string()),
+            },
+            jina: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("JINA_AI_API_KEY").ok(),
+                rate_limit: 100,
+                timeout_seconds: 30,
+                base_url: Some("https://api.jina.ai".to_string()),
+            },
+            firecrawl: ProviderConfig {
+                enabled: true,
+                api_key: std::env::var("FIRECRAWL_API_KEY").ok(),
+                rate_limit: 60,
+                timeout_seconds: 120,
+                base_url: std::env::var("FIRECRAWL_BASE_URL")
+                    .ok()
+                    .or_else(|| Some("https://api.firecrawl.dev".to_string())),
             },
         }
     }
 }
 
+impl Config {
+    pub fn load() -> Result<Self> {
+        let config: Config = Figment::new()
+            .merge(Toml::file("config.toml"))
+            .merge(Yaml::file("config.yaml"))
+            .merge(Yaml::file("config.yml"))
+            .merge(Env::prefixed("OMNISEARCH_"))
+            .extract()?;
+
+        Ok(config)
+    }
+
+    pub fn load_from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let config: Config = Figment::new()
+            .merge(Toml::file(path.as_ref()))
+            .merge(Env::prefixed("OMNISEARCH_"))
+            .extract()?;
+
+        Ok(config)
+    }
+
+    pub fn timeout_duration(&self, provider: &str) -> Duration {
+        let seconds = match provider {
+            "tavily" => self.providers.tavily.timeout_seconds,
+            "google" => self.providers.google.timeout_seconds,
+            "reddit" => self.providers.reddit.timeout_seconds,
+            "duckduckgo" => self.providers.duckduckgo.timeout_seconds,
+            "baidu" => self.providers.baidu.timeout_seconds,
+            "exa" => self.providers.exa.timeout_seconds,
+            "brave" => self.providers.brave.timeout_seconds,
+            "kagi" => self.providers.kagi.timeout_seconds,
+            "perplexity" => self.providers.perplexity.timeout_seconds,
+            "jina" => self.providers.jina.timeout_seconds,
+            "firecrawl" => self.providers.firecrawl.timeout_seconds,
+            _ => 30, // default timeout
+        };
+        Duration::from_secs(seconds)
+    }
+}
+
 // Global config instance
-pub static CONFIG: once_cell::sync::Lazy<Config> = once_cell::sync::Lazy::new(Config::new);
+pub static CONFIG: Lazy<Config> = Lazy::new(|| {
+    Config::load().unwrap_or_else(|_| {
+        tracing::warn!("Failed to load configuration from files, using defaults");
+        Config::default()
+    })
+});
 
-// Validate required environment variables
-pub fn validate_config() -> anyhow::Result<()> {
-    let mut missing_keys = Vec::new();
-    let mut available_keys = Vec::new();
+// Validate configuration and log provider availability
+pub fn validate_config() -> Result<()> {
+    let config = &*CONFIG;
+    let mut available_providers = Vec::new();
+    let mut missing_providers = Vec::new();
 
-    // Check search provider keys
-    if tavily_api_key().is_none() {
-        missing_keys.push("TAVILY_API_KEY");
-    } else {
-        available_keys.push("TAVILY_API_KEY");
+    // Check provider availability
+    if config.providers.tavily.enabled && config.providers.tavily.api_key.is_some() {
+        available_providers.push("tavily");
+    } else if config.providers.tavily.enabled {
+        missing_providers.push("tavily (missing TAVILY_API_KEY)");
     }
 
-    if brave_api_key().is_none() {
-        missing_keys.push("BRAVE_API_KEY");
-    } else {
-        available_keys.push("BRAVE_API_KEY");
+    if config.providers.google.enabled && config.providers.google.api_key.is_some() {
+        available_providers.push("google");
+    } else if config.providers.google.enabled {
+        missing_providers.push("google (missing GOOGLE_API_KEY)");
     }
 
-    if kagi_api_key().is_none() {
-        missing_keys.push("KAGI_API_KEY");
-    } else {
-        available_keys.push("KAGI_API_KEY");
+    if config.providers.reddit.enabled
+        && config.providers.reddit.client_id.is_some()
+        && config.providers.reddit.client_secret.is_some()
+    {
+        available_providers.push("reddit");
+    } else if config.providers.reddit.enabled {
+        missing_providers.push("reddit (missing REDDIT_CLIENT_ID/CLIENT_SECRET)");
     }
 
-    if google_api_key().is_none() {
-        missing_keys.push("GOOGLE_API_KEY");
-    } else {
-        available_keys.push("GOOGLE_API_KEY");
+    // DuckDuckGo doesn't require API key
+    if config.providers.duckduckgo.enabled {
+        available_providers.push("duckduckgo");
     }
 
-    if google_search_engine_id().is_none() {
-        missing_keys.push("GOOGLE_SEARCH_ENGINE_ID");
-    } else {
-        available_keys.push("GOOGLE_SEARCH_ENGINE_ID");
+    if config.providers.exa.enabled && config.providers.exa.api_key.is_some() {
+        available_providers.push("exa");
+    } else if config.providers.exa.enabled {
+        missing_providers.push("exa (missing EXA_API_KEY)");
     }
 
-    if reddit_client_id().is_none() {
-        missing_keys.push("REDDIT_CLIENT_ID");
+    // Log results
+    if !available_providers.is_empty() {
+        tracing::info!("Available providers: {}", available_providers.join(", "));
     } else {
-        available_keys.push("REDDIT_CLIENT_ID");
+        tracing::warn!("No providers available. Check your API keys.");
     }
 
-    if reddit_client_secret().is_none() {
-        missing_keys.push("REDDIT_CLIENT_SECRET");
-    } else {
-        available_keys.push("REDDIT_CLIENT_SECRET");
+    if !missing_providers.is_empty() {
+        tracing::info!("Disabled providers: {}", missing_providers.join(", "));
     }
 
-    if reddit_user_agent().is_none() {
-        missing_keys.push("REDDIT_USER_AGENT");
-    } else {
-        available_keys.push("REDDIT_USER_AGENT");
+    // Validate server configuration
+    if config.server.port == 0 {
+        return Err(eyre!("Server port cannot be 0"));
     }
 
-    if serpapi_api_key().is_none() {
-        missing_keys.push("SERPAPI_API_KEY");
-    } else {
-        available_keys.push("SERPAPI_API_KEY");
+    if config.server.max_connections == 0 {
+        return Err(eyre!("Max connections cannot be 0"));
     }
 
-    if brightdata_username().is_none() {
-        missing_keys.push("BRIGHTDATA_USERNAME");
-    } else {
-        available_keys.push("BRIGHTDATA_USERNAME");
-    }
-
-    if brightdata_password().is_none() {
-        missing_keys.push("BRIGHTDATA_PASSWORD");
-    } else {
-        available_keys.push("BRIGHTDATA_PASSWORD");
-    }
-
-    if exa_api_key().is_none() {
-        missing_keys.push("EXA_API_KEY");
-    } else {
-        available_keys.push("EXA_API_KEY");
-    }
-
-    if perplexity_api_key().is_none() {
-        missing_keys.push("PERPLEXITY_API_KEY");
-    } else {
-        available_keys.push("PERPLEXITY_API_KEY");
-    }
-
-    if jina_ai_api_key().is_none() {
-        missing_keys.push("JINA_AI_API_KEY");
-    } else {
-        available_keys.push("JINA_AI_API_KEY");
-    }
-
-    if firecrawl_api_key().is_none() {
-        missing_keys.push("FIRECRAWL_API_KEY");
-    } else {
-        available_keys.push("FIRECRAWL_API_KEY");
-    }
-
-    // Log available keys
-    if !available_keys.is_empty() {
-        eprintln!("Found API keys for: {}", available_keys.join(", "));
-    } else {
-        eprintln!("Warning: No API keys found. No providers will be available.");
-    }
-
-    // Log missing keys as informational
-    if !missing_keys.is_empty() {
-        eprintln!(
-            "Missing API keys for: {}. Some providers will not be available.",
-            missing_keys.join(", ")
-        );
+    // Validate cache configuration
+    if config.cache.enabled && matches!(config.cache.cache_type, CacheType::Redis) {
+        if config.cache.redis.url.is_empty() {
+            return Err(eyre!("Redis URL is required when using Redis cache"));
+        }
     }
 
     Ok(())
+}
+
+// Convenience functions for backward compatibility
+pub fn get_provider_api_key(provider: &str) -> Option<String> {
+    match provider {
+        "tavily" => CONFIG.providers.tavily.api_key.clone(),
+        "google" => CONFIG.providers.google.api_key.clone(),
+        "reddit_client_id" => CONFIG.providers.reddit.client_id.clone(),
+        "reddit_client_secret" => CONFIG.providers.reddit.client_secret.clone(),
+        "reddit_user_agent" => CONFIG.providers.reddit.user_agent.clone(),
+        "exa" => CONFIG.providers.exa.api_key.clone(),
+        "brave" => CONFIG.providers.brave.api_key.clone(),
+        "kagi" => CONFIG.providers.kagi.api_key.clone(),
+        "perplexity" => CONFIG.providers.perplexity.api_key.clone(),
+        "jina" => CONFIG.providers.jina.api_key.clone(),
+        "firecrawl" => CONFIG.providers.firecrawl.api_key.clone(),
+        "serpapi" => CONFIG.providers.baidu.api_key.clone(),
+        "brightdata_username" => CONFIG.providers.brightdata.username.clone(),
+        "brightdata_password" => CONFIG.providers.brightdata.password.clone(),
+        _ => None,
+    }
 }

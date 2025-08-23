@@ -185,7 +185,7 @@ async fn test_special_characters_in_query() {
         let result = provider.search(params).await;
         // Should handle special characters gracefully
         match result {
-            Ok(_) => {}, // Success is fine
+            Ok(_) => {} // Success is fine
             Err(e) => {
                 // Accept various error types as different providers may handle differently
                 assert!(
