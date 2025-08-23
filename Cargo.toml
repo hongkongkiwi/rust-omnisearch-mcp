@@ -55,6 +55,7 @@ failsafe = "1.2"
 # Input validation
 validator = { version = "0.18", features = ["derive"] }
 regex = "1.10"
+lazy_static = "1.4"
 
 # Health checks
 serde_yaml = "0.9"
@@ -109,13 +110,9 @@ documentation = []
 [dev-dependencies]
 tokio = { version = "1.0", features = ["macros", "rt"] }
 futures = "0.3"
-criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
 mockito = "1.3"
 tempfile = "3.8"
 
-[[bench]]
-name = "search_benchmarks"
-harness = false
 
 [package.metadata.docs.rs]
 all-features = true
