@@ -526,10 +526,9 @@ async fn test_memory_usage_stability() -> Result<()> {
         let test_data = vec![SearchResult {
             title: format!("Result {}", i),
             url: format!("https://example.com/{}", i),
-            snippet: Some(format!("Test snippet {}", i)),
+            snippet: format!("Test snippet {}", i),
             score: Some(0.5),
-            published_date: None,
-            favicon_url: None,
+            source_provider: "test".to_string(),
         }];
 
         get_cache_manager().await.set(&cache_key, test_data).await?;

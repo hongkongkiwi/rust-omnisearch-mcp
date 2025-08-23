@@ -166,7 +166,6 @@ pub async fn get_limiter_stats(provider: &str) -> Result<Option<RateLimiterStats
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::Instant;
 
     #[tokio::test]
     async fn test_rate_limiter_creation() {
