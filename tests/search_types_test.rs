@@ -8,11 +8,17 @@ fn test_search_params_creation() {
         include_domains: Some(vec!["example.com".to_string()]),
         exclude_domains: Some(vec!["exclude.com".to_string()]),
     };
-    
+
     assert_eq!(params.query, "test query");
     assert_eq!(params.limit, Some(10));
-    assert_eq!(params.include_domains, Some(vec!["example.com".to_string()]));
-    assert_eq!(params.exclude_domains, Some(vec!["exclude.com".to_string()]));
+    assert_eq!(
+        params.include_domains,
+        Some(vec!["example.com".to_string()])
+    );
+    assert_eq!(
+        params.exclude_domains,
+        Some(vec!["exclude.com".to_string()])
+    );
 }
 
 #[test]
@@ -23,7 +29,7 @@ fn test_search_params_with_none_values() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     assert_eq!(params.query, "test query");
     assert_eq!(params.limit, None);
     assert_eq!(params.include_domains, None);
@@ -38,7 +44,7 @@ fn test_search_params_with_empty_domains() {
         include_domains: Some(vec![]),
         exclude_domains: Some(vec![]),
     };
-    
+
     assert_eq!(params.query, "test query");
     assert_eq!(params.limit, Some(5));
     assert_eq!(params.include_domains, Some(vec![]));
@@ -54,7 +60,7 @@ fn test_search_result_creation() {
         score: Some(0.85),
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.title, "Test Title");
     assert_eq!(result.url, "https://example.com");
     assert_eq!(result.snippet, "Test snippet content");
@@ -71,7 +77,7 @@ fn test_search_result_without_score() {
         score: None,
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.title, "Test Title");
     assert_eq!(result.url, "https://example.com");
     assert_eq!(result.snippet, "Test snippet content");

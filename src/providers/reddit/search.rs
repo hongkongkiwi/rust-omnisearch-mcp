@@ -35,6 +35,12 @@ pub struct RedditSearchProvider {
     client: Client,
 }
 
+impl Default for RedditSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RedditSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
@@ -100,7 +106,7 @@ impl SearchProvider for RedditSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(&format!("{}/search", CONFIG.search.reddit.base_url))
+            .get(format!("{}/search", CONFIG.search.reddit.base_url))
             .header("User-Agent", user_agent)
             .basic_auth(client_id, Some(client_secret))
             .query(&query_params)

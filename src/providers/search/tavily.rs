@@ -25,6 +25,12 @@ pub struct TavilySearchProvider {
     client: Client,
 }
 
+impl Default for TavilySearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TavilySearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
@@ -99,7 +105,7 @@ impl SearchProvider for TavilySearchProvider {
         // Make the request
         let response = self
             .client
-            .post(&format!("{}/search", CONFIG.search.tavily.base_url))
+            .post(format!("{}/search", CONFIG.search.tavily.base_url))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

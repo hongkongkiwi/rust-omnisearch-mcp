@@ -1,7 +1,7 @@
+use crate::common::http::{create_http_client, handle_http_error};
 use crate::common::types::{
     BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult,
 };
-use crate::common::http::{create_http_client, handle_http_error};
 use crate::config::CONFIG;
 use async_trait::async_trait;
 use reqwest::Client;
@@ -21,6 +21,12 @@ struct GoogleResult {
 
 pub struct GoogleCustomSearchProvider {
     client: Client,
+}
+
+impl Default for GoogleCustomSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl GoogleCustomSearchProvider {
@@ -89,7 +95,7 @@ impl SearchProvider for GoogleCustomSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(&format!("{}/search", CONFIG.search.google.base_url))
+            .get(format!("{}/search", CONFIG.search.google.base_url))
             .query(&query_params)
             .send()
             .await

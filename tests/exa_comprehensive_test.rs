@@ -8,15 +8,18 @@ use omnisearch_mcp::{
 #[tokio::test]
 async fn test_exa_provider_comprehensive_search() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test with comprehensive search parameters
     let params = BaseSearchParams {
         query: "rust programming language".to_string(),
         limit: Some(3),
-        include_domains: Some(vec!["github.com".to_string(), "stackoverflow.com".to_string()]),
+        include_domains: Some(vec![
+            "github.com".to_string(),
+            "stackoverflow.com".to_string(),
+        ]),
         exclude_domains: Some(vec!["reddit.com".to_string()]),
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Validate results structure
@@ -34,9 +37,11 @@ async fn test_exa_provider_comprehensive_search() {
             match e.error_type {
                 ErrorType::ApiError => {
                     // Expected when API key is missing
-                    assert!(e.message.contains("Missing Exa API key") ||
-                           e.message.contains("Invalid Exa API key") ||
-                           e.message.contains("Missing API key"));
+                    assert!(
+                        e.message.contains("Missing Exa API key")
+                            || e.message.contains("Invalid Exa API key")
+                            || e.message.contains("Missing API key")
+                    );
                 }
                 ErrorType::InvalidInput => {
                     // Invalid input errors
@@ -44,14 +49,18 @@ async fn test_exa_provider_comprehensive_search() {
                 }
                 ErrorType::RateLimit => {
                     // Rate limit errors
-                    assert!(e.message.contains("Rate limit exceeded") ||
-                           e.message.contains("Exa rate limit exceeded"));
+                    assert!(
+                        e.message.contains("Rate limit exceeded")
+                            || e.message.contains("Exa rate limit exceeded")
+                    );
                 }
                 ErrorType::ProviderError => {
                     // Provider internal errors
-                    assert!(e.message.contains("Exa API internal error") ||
-                           e.message.contains("API internal error") ||
-                           e.message.contains("Provider internal error"));
+                    assert!(
+                        e.message.contains("Exa API internal error")
+                            || e.message.contains("API internal error")
+                            || e.message.contains("Provider internal error")
+                    );
                 }
                 _ => {
                     // Other error types are acceptable
@@ -65,7 +74,7 @@ async fn test_exa_provider_comprehensive_search() {
 #[tokio::test]
 async fn test_exa_provider_edge_cases() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test with empty query
     let params = BaseSearchParams {
         query: "".to_string(),
@@ -73,18 +82,18 @@ async fn test_exa_provider_edge_cases() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Empty query might still return results
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // Empty query might cause API errors, which is fine
             assert!(!e.message.is_empty());
         }
     }
-    
+
     // Test with high limit
     let params = BaseSearchParams {
         query: "test".to_string(),
@@ -92,18 +101,18 @@ async fn test_exa_provider_edge_cases() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Should handle high limits gracefully
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // High limits might hit API constraints, which is fine
             assert!(!e.message.is_empty());
         }
     }
-    
+
     // Test with complex domain filters
     let params = BaseSearchParams {
         query: "programming".to_string(),
@@ -122,11 +131,11 @@ async fn test_exa_provider_edge_cases() {
             "twitter.com".to_string(),
         ]),
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Should handle complex domain filters
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // Complex filters might cause API errors, which is fine
@@ -138,7 +147,7 @@ async fn test_exa_provider_edge_cases() {
 #[tokio::test]
 async fn test_exa_provider_error_scenarios() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test various error scenarios that might occur
     let scenarios = vec![
         // Missing API key scenario
@@ -163,12 +172,12 @@ async fn test_exa_provider_error_scenarios() {
             exclude_domains: None,
         },
     ];
-    
+
     for params in scenarios {
         match provider.search(params).await {
             Ok(results) => {
                 // Even with problematic parameters, we might get results
-                assert!(results.len() >= 0);
+                // Results length is always >= 0
             }
             Err(e) => {
                 // Errors are expected when API key is missing
@@ -181,12 +190,14 @@ async fn test_exa_provider_error_scenarios() {
 #[test]
 fn test_exa_provider_metadata() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test provider metadata
     assert_eq!(provider.name(), "exa");
     assert!(!provider.description().is_empty());
     assert!(provider.description().contains("Exa"));
-    assert!(provider.description().contains("high-quality search results"));
+    assert!(provider
+        .description()
+        .contains("high-quality search results"));
     assert!(provider.description().contains("relevance scores"));
     assert!(provider.description().contains("Requires Exa API key"));
 }
@@ -196,10 +207,10 @@ fn test_exa_provider_construction() {
     // Test that we can construct the provider multiple times
     let provider1 = ExaSearchProvider::new();
     let provider2 = ExaSearchProvider::new();
-    
+
     assert_eq!(provider1.name(), "exa");
     assert_eq!(provider2.name(), "exa");
-    
+
     // Both should have the same description
     assert_eq!(provider1.description(), provider2.description());
 }
@@ -207,26 +218,26 @@ fn test_exa_provider_construction() {
 #[test]
 fn test_exa_provider_score_inclusion() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test that Exa provider includes scores (implementation detail)
     // This ensures the score inclusion logic is tested
-    assert!(true); // Placeholder for score inclusion test
+    // TODO: Implement score inclusion test
 }
 
 #[test]
 fn test_exa_provider_relevance_scoring() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test relevance scoring features (implementation detail)
     // This ensures the relevance scoring logic is tested
-    assert!(true); // Placeholder for relevance scoring test
+    // TODO: Implement relevance scoring test
 }
 
 #[test]
 fn test_exa_provider_api_key_validation() {
     let provider = ExaSearchProvider::new();
-    
+
     // Test API key validation (implementation detail)
     // This ensures the API key validation logic is tested
-    assert!(true); // Placeholder for API key validation test
+    // TODO: Implement API key validation test
 }

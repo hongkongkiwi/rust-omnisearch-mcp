@@ -8,7 +8,7 @@ use omnisearch_mcp::{
 #[tokio::test]
 async fn test_baidu_provider_missing_api_key_error() {
     let provider = BaiduSearchProvider::new();
-    
+
     // Test with missing API key - should return an error
     let params = BaseSearchParams {
         query: "test query".to_string(),
@@ -16,7 +16,7 @@ async fn test_baidu_provider_missing_api_key_error() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(_) => {
             // If we get results, that's fine, but we're mainly testing
@@ -42,15 +42,15 @@ async fn test_baidu_provider_missing_api_key_error() {
 #[tokio::test]
 async fn test_baidu_provider_network_error_handling() {
     let provider = BaiduSearchProvider::new();
-    
+
     // Test with a query that should trigger network errors
     let params = BaseSearchParams {
-        query: "".to_string(), // Empty query
-        limit: Some(0), // Invalid limit
+        query: "".to_string(),         // Empty query
+        limit: Some(0),                // Invalid limit
         include_domains: Some(vec![]), // Empty domains
         exclude_domains: Some(vec![]), // Empty domains
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Even with strange parameters, we might get results
@@ -80,7 +80,7 @@ async fn test_baidu_provider_network_error_handling() {
 #[tokio::test]
 async fn test_baidu_provider_empty_query_handling() {
     let provider = BaiduSearchProvider::new();
-    
+
     // Test handling of empty queries
     let params = BaseSearchParams {
         query: "".to_string(),
@@ -88,7 +88,7 @@ async fn test_baidu_provider_empty_query_handling() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(_results) => {
             // Empty query might still return results or empty list

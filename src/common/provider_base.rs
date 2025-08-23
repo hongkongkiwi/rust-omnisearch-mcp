@@ -4,7 +4,11 @@ use crate::common::types::{ErrorType, ProviderError};
 
 /// A trait for providers that need API key validation
 pub trait ApiKeyProvider {
-    fn validate_api_key(&self, api_key: Option<&String>, provider_name: &str) -> Result<(), ProviderError> {
+    fn validate_api_key(
+        &self,
+        api_key: Option<&String>,
+        provider_name: &str,
+    ) -> Result<(), ProviderError> {
         if api_key.is_none() {
             Err(ProviderError::new(
                 ErrorType::ApiError,
@@ -20,7 +24,12 @@ pub trait ApiKeyProvider {
 
 /// A trait for providers that need multiple credential validation
 pub trait MultiCredentialProvider {
-    fn validate_credentials(&self, credentials: Vec<Option<&String>>, error_messages: Vec<&str>, provider_name: &str) -> Result<(), ProviderError> {
+    fn validate_credentials(
+        &self,
+        credentials: Vec<Option<&String>>,
+        error_messages: Vec<&str>,
+        provider_name: &str,
+    ) -> Result<(), ProviderError> {
         for (i, credential) in credentials.iter().enumerate() {
             if credential.is_none() {
                 return Err(ProviderError::new(
@@ -40,17 +49,25 @@ pub struct ProviderUtils;
 
 impl ProviderUtils {
     /// Create a standardized provider error
-    pub fn provider_error(error_type: ErrorType, message: String, provider_name: String) -> ProviderError {
+    pub fn provider_error(
+        error_type: ErrorType,
+        message: String,
+        provider_name: String,
+    ) -> ProviderError {
         ProviderError::new(error_type, message, provider_name, None)
     }
-    
+
     /// Convert a vector of strings to a comma-separated string
     pub fn join_domains(domains: &[String]) -> String {
         domains.join(",")
     }
-    
+
     /// Create a site filter from domains
     pub fn create_site_filter(domains: &[String]) -> String {
-        domains.iter().map(|d| format!("site:{}", d)).collect::<Vec<_>>().join(" OR ")
+        domains
+            .iter()
+            .map(|d| format!("site:{}", d))
+            .collect::<Vec<_>>()
+            .join(" OR ")
     }
 }

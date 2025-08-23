@@ -19,7 +19,7 @@ fn test_handle_http_error_400() {
         "Forbidden",
         "Internal error",
     );
-    
+
     match error.error_type {
         ErrorType::InvalidInput => assert!(true),
         _ => assert!(false, "Expected InvalidInput"),
@@ -38,7 +38,7 @@ fn test_handle_http_error_401() {
         "Forbidden",
         "Internal error",
     );
-    
+
     match error.error_type {
         ErrorType::ApiError => assert!(true),
         _ => assert!(false, "Expected ApiError"),
@@ -58,7 +58,7 @@ fn test_handle_http_error_403() {
         "API key does not have access",
         "Internal error",
     );
-    
+
     match error.error_type {
         ErrorType::ApiError => assert!(true),
         _ => assert!(false, "Expected ApiError"),
@@ -78,7 +78,7 @@ fn test_handle_http_error_429() {
         "Forbidden",
         "Internal error",
     );
-    
+
     match error.error_type {
         ErrorType::RateLimit => assert!(true),
         _ => assert!(false, "Expected RateLimit"),
@@ -98,7 +98,7 @@ fn test_handle_http_error_500() {
         "Forbidden",
         "Provider internal error occurred",
     );
-    
+
     match error.error_type {
         ErrorType::ProviderError => assert!(true),
         _ => assert!(false, "Expected ProviderError"),
@@ -118,7 +118,7 @@ fn test_handle_http_error_unexpected() {
         "Forbidden",
         "Internal error",
     );
-    
+
     match error.error_type {
         ErrorType::ApiError => assert!(true),
         _ => assert!(false, "Expected ApiError"),

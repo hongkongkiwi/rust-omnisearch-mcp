@@ -1,4 +1,6 @@
-use crate::{config::CONFIG, server::register_search_provider, common::provider_factory::ProviderFactory};
+use crate::{
+    common::provider_factory::ProviderFactory, config::CONFIG, server::register_search_provider,
+};
 
 // Import search providers
 pub mod baidu;
@@ -12,7 +14,7 @@ pub mod search;
 pub fn initialize_providers() {
     // Initialize search providers using the factory
     let search_providers = ProviderFactory::create_search_providers();
-    
+
     for provider in search_providers {
         // All our new providers are regular search providers (not AI response providers)
         register_search_provider(provider, false);

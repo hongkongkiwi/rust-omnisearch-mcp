@@ -13,6 +13,12 @@ pub struct AvailableProviders {
     pub enhancement: RwLock<std::collections::HashSet<String>>,
 }
 
+impl Default for AvailableProviders {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AvailableProviders {
     pub fn new() -> Self {
         Self {
@@ -29,6 +35,12 @@ pub struct ToolRegistry {
     search_providers: RwLock<HashMap<String, Box<dyn SearchProvider>>>,
     processing_providers: RwLock<HashMap<String, Box<dyn ProcessingProvider>>>,
     enhancement_providers: RwLock<HashMap<String, Box<dyn EnhancementProvider>>>,
+}
+
+impl Default for ToolRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ToolRegistry {

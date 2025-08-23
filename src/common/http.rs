@@ -22,7 +22,7 @@ pub fn handle_http_error(
     internal_error_message: &str,
 ) -> crate::common::types::ProviderError {
     use crate::common::types::{ErrorType, ProviderError};
-    
+
     match status.as_u16() {
         400 => ProviderError::new(
             ErrorType::InvalidInput,

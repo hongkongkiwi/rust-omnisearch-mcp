@@ -1,7 +1,7 @@
+use crate::common::http::{create_http_client, handle_http_error};
 use crate::common::types::{
     BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult,
 };
-use crate::common::http::{create_http_client, handle_http_error};
 use crate::config::CONFIG;
 use async_trait::async_trait;
 use reqwest::Client;
@@ -22,6 +22,12 @@ struct ExaResult {
 
 pub struct ExaSearchProvider {
     client: Client,
+}
+
+impl Default for ExaSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ExaSearchProvider {
@@ -86,7 +92,7 @@ impl SearchProvider for ExaSearchProvider {
         // Make the request
         let response = self
             .client
-            .post(&format!("{}/search", CONFIG.search.exa.base_url))
+            .post(format!("{}/search", CONFIG.search.exa.base_url))
             .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json")
             .json(&request_body)

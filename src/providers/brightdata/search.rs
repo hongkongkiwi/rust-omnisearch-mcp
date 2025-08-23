@@ -23,6 +23,12 @@ pub struct BrightDataSearchProvider {
     client: Client,
 }
 
+impl Default for BrightDataSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BrightDataSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
@@ -84,7 +90,7 @@ impl SearchProvider for BrightDataSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(&format!("{}/search", CONFIG.search.brightdata.base_url))
+            .get(format!("{}/search", CONFIG.search.brightdata.base_url))
             .basic_auth(username, Some(password))
             .query(&query_params)
             .send()

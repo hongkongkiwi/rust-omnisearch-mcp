@@ -23,6 +23,12 @@ pub struct BaiduSearchProvider {
     client: Client,
 }
 
+impl Default for BaiduSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BaiduSearchProvider {
     pub fn new() -> Self {
         let client = Client::builder()
@@ -69,7 +75,7 @@ impl SearchProvider for BaiduSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(&format!("{}/search", CONFIG.search.baidu.base_url))
+            .get(format!("{}/search", CONFIG.search.baidu.base_url))
             .query(&query_params)
             .send()
             .await

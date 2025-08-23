@@ -1,8 +1,6 @@
 //! Tests for the main application entry point
 
-use omnisearch_mcp::{
-    config::validate_config,
-};
+use omnisearch_mcp::config::validate_config;
 
 #[test]
 fn test_main_application_compilation() {
@@ -24,7 +22,7 @@ fn test_config_validation_in_main_context() {
     let result = validate_config();
     // This should either succeed or fail gracefully with meaningful errors
     assert!(result.is_ok() || result.is_err());
-    
+
     // If it fails, the error should be meaningful
     if let Err(e) = result {
         // Error messages should be informative

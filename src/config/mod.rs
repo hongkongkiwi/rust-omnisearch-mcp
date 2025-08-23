@@ -136,6 +136,12 @@ pub struct BrightDataProviderConfig {
     pub timeout: u64,
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Config {
     pub fn new() -> Self {
         Self {

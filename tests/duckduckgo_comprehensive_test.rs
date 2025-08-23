@@ -8,15 +8,18 @@ use omnisearch_mcp::{
 #[tokio::test]
 async fn test_duckduckgo_provider_comprehensive_search() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test with comprehensive search parameters
     let params = BaseSearchParams {
         query: "rust programming language".to_string(),
         limit: Some(5),
-        include_domains: Some(vec!["github.com".to_string(), "stackoverflow.com".to_string()]),
+        include_domains: Some(vec![
+            "github.com".to_string(),
+            "stackoverflow.com".to_string(),
+        ]),
         exclude_domains: Some(vec!["reddit.com".to_string()]),
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Validate results structure
@@ -34,10 +37,12 @@ async fn test_duckduckgo_provider_comprehensive_search() {
             match e.error_type {
                 ErrorType::ApiError => {
                     // DuckDuckGo doesn't typically require API keys, so other errors are expected
-                    assert!(e.message.contains("Failed to send request") ||
-                           e.message.contains("Failed to parse response") ||
-                           e.message.contains("API access forbidden") ||
-                           e.message.contains("Unexpected error"));
+                    assert!(
+                        e.message.contains("Failed to send request")
+                            || e.message.contains("Failed to parse response")
+                            || e.message.contains("API access forbidden")
+                            || e.message.contains("Unexpected error")
+                    );
                 }
                 ErrorType::InvalidInput => {
                     // Invalid input errors
@@ -49,8 +54,10 @@ async fn test_duckduckgo_provider_comprehensive_search() {
                 }
                 ErrorType::ProviderError => {
                     // Provider internal errors
-                    assert!(e.message.contains("API internal error") ||
-                           e.message.contains("DuckDuckGo API internal error"));
+                    assert!(
+                        e.message.contains("API internal error")
+                            || e.message.contains("DuckDuckGo API internal error")
+                    );
                 }
                 _ => {
                     // Other error types are acceptable
@@ -64,7 +71,7 @@ async fn test_duckduckgo_provider_comprehensive_search() {
 #[tokio::test]
 async fn test_duckduckgo_provider_edge_cases() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test with empty query
     let params = BaseSearchParams {
         query: "".to_string(),
@@ -72,18 +79,18 @@ async fn test_duckduckgo_provider_edge_cases() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Empty query might still return results
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // Empty query might cause API errors, which is fine
             assert!(!e.message.is_empty());
         }
     }
-    
+
     // Test with high limit
     let params = BaseSearchParams {
         query: "test".to_string(),
@@ -91,18 +98,18 @@ async fn test_duckduckgo_provider_edge_cases() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Should handle high limits gracefully
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // High limits might hit API constraints, which is fine
             assert!(!e.message.is_empty());
         }
     }
-    
+
     // Test with complex domain filters
     let params = BaseSearchParams {
         query: "programming".to_string(),
@@ -120,11 +127,11 @@ async fn test_duckduckgo_provider_edge_cases() {
             "facebook.com".to_string(),
         ]),
     };
-    
+
     match provider.search(params).await {
         Ok(results) => {
             // Should handle complex domain filters
-            assert!(results.len() >= 0);
+            // Results length is always >= 0
         }
         Err(e) => {
             // Complex filters might cause API errors, which is fine
@@ -136,7 +143,7 @@ async fn test_duckduckgo_provider_edge_cases() {
 #[tokio::test]
 async fn test_duckduckgo_provider_error_scenarios() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test various error scenarios that might occur
     let scenarios = vec![
         // Normal search scenario
@@ -161,12 +168,12 @@ async fn test_duckduckgo_provider_error_scenarios() {
             exclude_domains: None,
         },
     ];
-    
+
     for params in scenarios {
         match provider.search(params).await {
             Ok(results) => {
                 // Even with problematic parameters, we might get results
-                assert!(results.len() >= 0);
+                // Results length is always >= 0
             }
             Err(e) => {
                 // Errors are expected for various reasons
@@ -179,7 +186,7 @@ async fn test_duckduckgo_provider_error_scenarios() {
 #[test]
 fn test_duckduckgo_provider_metadata() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test provider metadata
     assert_eq!(provider.name(), "duckduckgo");
     assert!(!provider.description().is_empty());
@@ -195,10 +202,10 @@ fn test_duckduckgo_provider_construction() {
     // Test that we can construct the provider multiple times
     let provider1 = DuckDuckGoSearchProvider::new();
     let provider2 = DuckDuckGoSearchProvider::new();
-    
+
     assert_eq!(provider1.name(), "duckduckgo");
     assert_eq!(provider2.name(), "duckduckgo");
-    
+
     // Both should have the same description
     assert_eq!(provider1.description(), provider2.description());
 }
@@ -206,7 +213,7 @@ fn test_duckduckgo_provider_construction() {
 #[test]
 fn test_duckduckgo_provider_privacy_features() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test privacy-focused features (implementation detail)
     // This ensures the privacy logic is tested
     assert!(true); // Placeholder for privacy features test
@@ -215,7 +222,7 @@ fn test_duckduckgo_provider_privacy_features() {
 #[test]
 fn test_duckduckgo_provider_no_api_key_required() {
     let provider = DuckDuckGoSearchProvider::new();
-    
+
     // Test that DuckDuckGo doesn't require API keys
     // This is a key feature of the provider
     assert!(true); // Placeholder for no API key test

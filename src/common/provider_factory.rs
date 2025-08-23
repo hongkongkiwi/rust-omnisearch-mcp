@@ -10,45 +10,59 @@ impl ProviderFactory {
     /// Create all available search providers based on configuration
     pub fn create_search_providers() -> Vec<Box<dyn SearchProvider>> {
         let mut providers: Vec<Box<dyn SearchProvider>> = Vec::new();
-        
+
         // Tavily provider
         if CONFIG.search.tavily.api_key.is_some() {
-            providers.push(Box::new(crate::providers::search::TavilySearchProvider::new()));
+            providers.push(Box::new(
+                crate::providers::search::TavilySearchProvider::new(),
+            ));
         }
-        
+
         // Google Custom Search provider
-        if CONFIG.search.google.api_key.is_some() && CONFIG.search.google.search_engine_id.is_some() {
-            providers.push(Box::new(crate::providers::google::GoogleCustomSearchProvider::new()));
+        if CONFIG.search.google.api_key.is_some() && CONFIG.search.google.search_engine_id.is_some()
+        {
+            providers.push(Box::new(
+                crate::providers::google::GoogleCustomSearchProvider::new(),
+            ));
         }
-        
+
         // Reddit provider
-        if CONFIG.search.reddit.client_id.is_some() 
-            && CONFIG.search.reddit.client_secret.is_some() 
-            && CONFIG.search.reddit.user_agent.is_some() {
-            providers.push(Box::new(crate::providers::reddit::RedditSearchProvider::new()));
+        if CONFIG.search.reddit.client_id.is_some()
+            && CONFIG.search.reddit.client_secret.is_some()
+            && CONFIG.search.reddit.user_agent.is_some()
+        {
+            providers.push(Box::new(
+                crate::providers::reddit::RedditSearchProvider::new(),
+            ));
         }
-        
+
         // DuckDuckGo provider (no API key required)
-        providers.push(Box::new(crate::providers::duckduckgo::DuckDuckGoSearchProvider::new()));
-        
+        providers.push(Box::new(
+            crate::providers::duckduckgo::DuckDuckGoSearchProvider::new(),
+        ));
+
         // Baidu provider
         if CONFIG.search.baidu.api_key.is_some() {
             providers.push(Box::new(crate::providers::baidu::BaiduSearchProvider::new()));
         }
-        
+
         // Bright Data provider
-        if CONFIG.search.brightdata.username.is_some() && CONFIG.search.brightdata.password.is_some() {
-            providers.push(Box::new(crate::providers::brightdata::BrightDataSearchProvider::new()));
+        if CONFIG.search.brightdata.username.is_some()
+            && CONFIG.search.brightdata.password.is_some()
+        {
+            providers.push(Box::new(
+                crate::providers::brightdata::BrightDataSearchProvider::new(),
+            ));
         }
-        
+
         // Exa provider
         if CONFIG.search.exa.api_key.is_some() {
             providers.push(Box::new(crate::providers::exa::ExaSearchProvider::new()));
         }
-        
+
         providers
     }
-    
+
     /// Get provider names for logging
     pub fn get_provider_names(providers: &[Box<dyn SearchProvider>]) -> Vec<String> {
         providers.iter().map(|p| p.name().to_string()).collect()

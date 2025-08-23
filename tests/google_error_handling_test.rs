@@ -8,7 +8,7 @@ use omnisearch_mcp::{
 #[tokio::test]
 async fn test_google_provider_missing_credentials_error() {
     let provider = GoogleCustomSearchProvider::new();
-    
+
     // Test with missing credentials - should return an error
     let params = BaseSearchParams {
         query: "test query".to_string(),
@@ -16,7 +16,7 @@ async fn test_google_provider_missing_credentials_error() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(_) => {
             // If we get results, that's fine for testing purposes
@@ -27,7 +27,11 @@ async fn test_google_provider_missing_credentials_error() {
             match e.error_type {
                 ErrorType::ApiError => {
                     // This is expected when credentials are missing
-                    assert!(e.message.contains("Missing") || e.message.contains("API key") || e.message.contains("Engine ID"));
+                    assert!(
+                        e.message.contains("Missing")
+                            || e.message.contains("API key")
+                            || e.message.contains("Engine ID")
+                    );
                 }
                 _ => {
                     // Other error types are acceptable too
@@ -41,15 +45,15 @@ async fn test_google_provider_missing_credentials_error() {
 #[tokio::test]
 async fn test_google_provider_invalid_parameters() {
     let provider = GoogleCustomSearchProvider::new();
-    
+
     // Test with invalid parameters
     let params = BaseSearchParams {
-        query: "".to_string(), // Empty query
-        limit: Some(0), // Invalid limit
+        query: "".to_string(),         // Empty query
+        limit: Some(0),                // Invalid limit
         include_domains: Some(vec![]), // Empty domains
         exclude_domains: Some(vec![]), // Empty domains
     };
-    
+
     match provider.search(params).await {
         Ok(_results) => {
             // Even with invalid parameters, we might get results
@@ -66,7 +70,7 @@ async fn test_google_provider_invalid_parameters() {
 #[tokio::test]
 async fn test_google_provider_extreme_limits() {
     let provider = GoogleCustomSearchProvider::new();
-    
+
     // Test with extreme limits
     let params = BaseSearchParams {
         query: "test".to_string(),
@@ -74,7 +78,7 @@ async fn test_google_provider_extreme_limits() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     match provider.search(params).await {
         Ok(_results) => {
             // Should handle extreme limits gracefully

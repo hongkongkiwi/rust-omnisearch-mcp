@@ -1,7 +1,7 @@
+use crate::common::http::{create_http_client, handle_http_error};
 use crate::common::types::{
     BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult,
 };
-use crate::common::http::{create_http_client, handle_http_error};
 use crate::config::CONFIG;
 use async_trait::async_trait;
 use reqwest::Client;
@@ -21,6 +21,12 @@ struct DuckDuckGoResult {
 
 pub struct DuckDuckGoSearchProvider {
     client: Client,
+}
+
+impl Default for DuckDuckGoSearchProvider {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DuckDuckGoSearchProvider {
@@ -54,7 +60,7 @@ impl SearchProvider for DuckDuckGoSearchProvider {
         // Make the request
         let response = self
             .client
-            .get(&format!("{}/search", CONFIG.search.duckduckgo.base_url))
+            .get(format!("{}/search", CONFIG.search.duckduckgo.base_url))
             .query(&query_params)
             .send()
             .await

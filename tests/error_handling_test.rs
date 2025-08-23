@@ -8,7 +8,7 @@ fn test_provider_error_creation() {
         "test_provider".to_string(),
         None,
     );
-    
+
     // Use match instead of assert_eq for ErrorType
     match error.error_type {
         ErrorType::ApiError => assert!(true),
@@ -28,7 +28,7 @@ fn test_provider_error_with_source() {
         "test_provider".to_string(),
         Some(source_error),
     );
-    
+
     match error.error_type {
         ErrorType::RateLimit => assert!(true),
         _ => assert!(false, "Expected RateLimit"),
@@ -54,7 +54,7 @@ fn test_provider_error_display() {
         "test_provider".to_string(),
         None,
     );
-    
+
     let error_string = format!("{}", error);
     assert!(error_string.contains("Provider error"));
     assert!(error_string.contains("Test error"));
@@ -70,7 +70,7 @@ fn test_search_result_with_score() {
         score: Some(0.85),
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.title, "Test Title");
     assert_eq!(result.url, "https://example.com");
     assert_eq!(result.snippet, "Test snippet");
@@ -87,7 +87,7 @@ fn test_search_result_without_score() {
         score: None,
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.title, "Test Title");
     assert_eq!(result.url, "https://example.com");
     assert_eq!(result.snippet, "Test snippet");
@@ -103,11 +103,17 @@ fn test_base_search_params_with_all_fields() {
         include_domains: Some(vec!["example.com".to_string(), "test.com".to_string()]),
         exclude_domains: Some(vec!["exclude.com".to_string()]),
     };
-    
+
     assert_eq!(params.query, "test query");
     assert_eq!(params.limit, Some(10));
-    assert_eq!(params.include_domains, Some(vec!["example.com".to_string(), "test.com".to_string()]));
-    assert_eq!(params.exclude_domains, Some(vec!["exclude.com".to_string()]));
+    assert_eq!(
+        params.include_domains,
+        Some(vec!["example.com".to_string(), "test.com".to_string()])
+    );
+    assert_eq!(
+        params.exclude_domains,
+        Some(vec!["exclude.com".to_string()])
+    );
 }
 
 #[test]
@@ -118,7 +124,7 @@ fn test_base_search_params_with_none_fields() {
         include_domains: None,
         exclude_domains: None,
     };
-    
+
     assert_eq!(params.query, "test query");
     assert_eq!(params.limit, None);
     assert_eq!(params.include_domains, None);
@@ -129,12 +135,10 @@ fn test_base_search_params_with_none_fields() {
 fn test_processing_result_struct() {
     let result = ProcessingResult {
         content: "Processed content".to_string(),
-        raw_contents: Some(vec![
-            RawContent {
-                url: "https://example.com".to_string(),
-                content: "Raw content".to_string(),
-            }
-        ]),
+        raw_contents: Some(vec![RawContent {
+            url: "https://example.com".to_string(),
+            content: "Raw content".to_string(),
+        }]),
         metadata: ProcessingMetadata {
             title: Some("Test Title".to_string()),
             author: Some("Test Author".to_string()),
@@ -147,22 +151,25 @@ fn test_processing_result_struct() {
         },
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.content, "Processed content");
     assert!(result.raw_contents.is_some());
     assert_eq!(result.source_provider, "test_provider");
-    
+
     let raw_content = result.raw_contents.unwrap();
     assert_eq!(raw_content.len(), 1);
     assert_eq!(raw_content[0].url, "https://example.com");
     assert_eq!(raw_content[0].content, "Raw content");
-    
+
     let metadata = result.metadata;
     assert_eq!(metadata.title, Some("Test Title".to_string()));
     assert_eq!(metadata.author, Some("Test Author".to_string()));
     assert_eq!(metadata.date, Some("2023-01-01".to_string()));
     assert_eq!(metadata.word_count, Some(100));
-    assert_eq!(metadata.failed_urls, Some(vec!["https://failed.com".to_string()]));
+    assert_eq!(
+        metadata.failed_urls,
+        Some(vec!["https://failed.com".to_string()])
+    );
     assert_eq!(metadata.urls_processed, Some(5));
     assert_eq!(metadata.successful_extractions, Some(3));
     assert_eq!(metadata.extract_depth, Some("advanced".to_string()));
@@ -173,31 +180,27 @@ fn test_enhancement_result_struct() {
     let result = EnhancementResult {
         original_content: "Original content".to_string(),
         enhanced_content: "Enhanced content".to_string(),
-        enhancements: vec![
-            Enhancement {
-                r#type: "summary".to_string(),
-                description: "Added summary".to_string(),
-            }
-        ],
-        sources: Some(vec![
-            EnhancementSource {
-                title: "Source Title".to_string(),
-                url: "https://source.com".to_string(),
-            }
-        ]),
+        enhancements: vec![Enhancement {
+            r#type: "summary".to_string(),
+            description: "Added summary".to_string(),
+        }],
+        sources: Some(vec![EnhancementSource {
+            title: "Source Title".to_string(),
+            url: "https://source.com".to_string(),
+        }]),
         source_provider: "test_provider".to_string(),
     };
-    
+
     assert_eq!(result.original_content, "Original content");
     assert_eq!(result.enhanced_content, "Enhanced content");
     assert_eq!(result.source_provider, "test_provider");
     assert_eq!(result.enhancements.len(), 1);
     assert!(result.sources.is_some());
-    
+
     let enhancement = &result.enhancements[0];
     assert_eq!(enhancement.r#type, "summary");
     assert_eq!(enhancement.description, "Added summary");
-    
+
     let sources = result.sources.unwrap();
     assert_eq!(sources.len(), 1);
     assert_eq!(sources[0].title, "Source Title");
