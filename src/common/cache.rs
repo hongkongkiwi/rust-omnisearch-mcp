@@ -33,7 +33,7 @@ impl MemoryCache {
             .max_capacity(config.max_entries as u64)
             .time_to_live(Duration::from_secs(config.ttl_seconds))
             .build();
-        
+
         Self { cache }
     }
 }
@@ -42,7 +42,11 @@ impl MemoryCache {
 impl CacheProvider for MemoryCache {
     async fn get(&self, key: &str) -> Result<Option<CacheValue>> {
         let value = self.cache.get(key).await;
-        debug!("Cache {} for key: {}", if value.is_some() { "hit" } else { "miss" }, key);
+        debug!(
+            "Cache {} for key: {}",
+            if value.is_some() { "hit" } else { "miss" },
+            key
+        );
         Ok(value)
     }
 
@@ -79,12 +83,12 @@ pub struct RedisCache {
 impl RedisCache {
     pub async fn new(config: &CacheConfig) -> Result<Self> {
         use redis::Client;
-        
+
         let client = Client::open(config.redis.url.as_str())?;
         let connection_manager = ConnectionManager::new(client).await?;
-        
+
         info!("Connected to Redis cache at: {}", config.redis.url);
-        
+
         Ok(Self {
             connection_manager,
             ttl: Duration::from_secs(config.ttl_seconds),
@@ -97,10 +101,10 @@ impl RedisCache {
 impl CacheProvider for RedisCache {
     async fn get(&self, key: &str) -> Result<Option<CacheValue>> {
         use redis::AsyncCommands;
-        
+
         let mut conn = self.connection_manager.clone();
         let cached_data: Option<String> = conn.get(key).await?;
-        
+
         match cached_data {
             Some(data) => {
                 match serde_json::from_str::<CacheValue>(&data) {
@@ -125,10 +129,10 @@ impl CacheProvider for RedisCache {
 
     async fn set(&self, key: &str, value: CacheValue, ttl: Duration) -> Result<()> {
         use redis::AsyncCommands;
-        
+
         let mut conn = self.connection_manager.clone();
         let serialized = serde_json::to_string(&value)?;
-        
+
         let _: () = conn.set_ex(key, serialized, ttl.as_secs()).await?;
         debug!("Cached {} results for key: {}", value.len(), key);
         Ok(())
@@ -136,7 +140,7 @@ impl CacheProvider for RedisCache {
 
     async fn delete(&self, key: &str) -> Result<()> {
         use redis::AsyncCommands;
-        
+
         let mut conn = self.connection_manager.clone();
         let _: () = conn.del(key).await?;
         debug!("Removed cache entry for key: {}", key);
@@ -145,7 +149,7 @@ impl CacheProvider for RedisCache {
 
     async fn clear(&self) -> Result<()> {
         use redis::AsyncCommands;
-        
+
         let mut conn = self.connection_manager.clone();
         let _: () = conn.cmd("FLUSHALL").query_async(&mut conn).await?;
         info!("Cleared Redis cache");
@@ -154,7 +158,7 @@ impl CacheProvider for RedisCache {
 
     async fn size(&self) -> Result<usize> {
         use redis::AsyncCommands;
-        
+
         let mut conn = self.connection_manager.clone();
         let dbsize: u64 = conn.cmd("DBSIZE").query_async(&mut conn).await?;
         Ok(dbsize as usize)
@@ -169,7 +173,7 @@ pub struct CacheManager {
 impl CacheManager {
     pub async fn new() -> Result<Self> {
         let config = &CONFIG.cache;
-        
+
         if !config.enabled {
             info!("Cache disabled");
             return Ok(Self {
@@ -190,7 +194,9 @@ impl CacheManager {
             }
             #[cfg(not(feature = "caching"))]
             CacheType::Redis => {
-                error!("Redis cache requested but caching feature not enabled, falling back to memory");
+                error!(
+                    "Redis cache requested but caching feature not enabled, falling back to memory"
+                );
                 Box::new(MemoryCache::new(config))
             }
         };
@@ -204,7 +210,7 @@ impl CacheManager {
     pub fn generate_cache_key(provider: &str, query: &str, params: &str) -> String {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
-        
+
         let mut hasher = DefaultHasher::new();
         format!("{}:{}:{}", provider, query, params).hash(&mut hasher);
         format!("omnisearch:{}:{:x}", provider, hasher.finish())
@@ -253,15 +259,17 @@ use once_cell::sync::OnceCell;
 static CACHE_MANAGER: OnceCell<CacheManager> = OnceCell::new();
 
 pub async fn get_cache_manager() -> &'static CacheManager {
-    CACHE_MANAGER.get_or_init(|| async {
-        CacheManager::new().await.unwrap_or_else(|e| {
-            error!("Failed to initialize cache manager: {}", e);
-            CacheManager {
-                provider: Box::new(MemoryCache::new(&CONFIG.cache)),
-                enabled: false,
-            }
+    CACHE_MANAGER
+        .get_or_init(|| async {
+            CacheManager::new().await.unwrap_or_else(|e| {
+                error!("Failed to initialize cache manager: {}", e);
+                CacheManager {
+                    provider: Box::new(MemoryCache::new(&CONFIG.cache)),
+                    enabled: false,
+                }
+            })
         })
-    }).await
+        .await
 }
 
 #[cfg(test)]
@@ -298,13 +306,16 @@ mod tests {
 
         let cache = MemoryCache::new(&config);
         let test_results = create_test_results();
-        
+
         // Test set and get
-        cache.set("test_key", test_results.clone(), Duration::from_secs(60)).await.unwrap();
+        cache
+            .set("test_key", test_results.clone(), Duration::from_secs(60))
+            .await
+            .unwrap();
         let retrieved = cache.get("test_key").await.unwrap();
         assert!(retrieved.is_some());
         assert_eq!(retrieved.unwrap().len(), 2);
-        
+
         // Test delete
         cache.delete("test_key").await.unwrap();
         let retrieved = cache.get("test_key").await.unwrap();
@@ -316,7 +327,7 @@ mod tests {
         let key1 = CacheManager::generate_cache_key("tavily", "rust programming", "limit=10");
         let key2 = CacheManager::generate_cache_key("tavily", "rust programming", "limit=10");
         let key3 = CacheManager::generate_cache_key("tavily", "python programming", "limit=10");
-        
+
         assert_eq!(key1, key2);
         assert_ne!(key1, key3);
         assert!(key1.starts_with("omnisearch:tavily:"));

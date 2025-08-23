@@ -1,8 +1,12 @@
-use std::{collections::HashMap, sync::Arc, time::{Duration, Instant}};
-use tokio::sync::RwLock;
-use metrics::{counter, histogram, gauge, describe_counter, describe_histogram, describe_gauge};
-use tracing::{debug, info, error};
 use eyre::Result;
+use metrics::{counter, describe_counter, describe_gauge, describe_histogram, gauge, histogram};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, Instant},
+};
+use tokio::sync::RwLock;
+use tracing::{debug, error, info};
 
 use crate::config::CONFIG;
 
@@ -35,12 +39,12 @@ pub struct MetricsCollector {
 impl MetricsCollector {
     pub fn new() -> Self {
         let enabled = CONFIG.metrics.enabled;
-        
+
         if enabled {
             Self::register_metrics();
             info!("Metrics collection enabled");
         }
-        
+
         Self {
             enabled,
             stats: Arc::new(RwLock::new(HashMap::new())),
@@ -49,20 +53,44 @@ impl MetricsCollector {
 
     fn register_metrics() {
         // Request counters
-        describe_counter!("omnisearch_requests_total", "Total number of search requests by provider");
-        describe_counter!("omnisearch_requests_successful_total", "Total number of successful requests by provider");
-        describe_counter!("omnisearch_requests_failed_total", "Total number of failed requests by provider");
-        describe_counter!("omnisearch_cache_hits_total", "Total number of cache hits by provider");
-        describe_counter!("omnisearch_cache_misses_total", "Total number of cache misses by provider");
-        
+        describe_counter!(
+            "omnisearch_requests_total",
+            "Total number of search requests by provider"
+        );
+        describe_counter!(
+            "omnisearch_requests_successful_total",
+            "Total number of successful requests by provider"
+        );
+        describe_counter!(
+            "omnisearch_requests_failed_total",
+            "Total number of failed requests by provider"
+        );
+        describe_counter!(
+            "omnisearch_cache_hits_total",
+            "Total number of cache hits by provider"
+        );
+        describe_counter!(
+            "omnisearch_cache_misses_total",
+            "Total number of cache misses by provider"
+        );
+
         // Response time histograms
-        describe_histogram!("omnisearch_request_duration_seconds", "Request duration in seconds by provider");
-        describe_histogram!("omnisearch_response_size_bytes", "Response size in bytes by provider");
-        
+        describe_histogram!(
+            "omnisearch_request_duration_seconds",
+            "Request duration in seconds by provider"
+        );
+        describe_histogram!(
+            "omnisearch_response_size_bytes",
+            "Response size in bytes by provider"
+        );
+
         // Gauges
         describe_gauge!("omnisearch_active_providers", "Number of active providers");
         describe_gauge!("omnisearch_cache_size", "Current cache size");
-        describe_gauge!("omnisearch_rate_limiter_remaining", "Remaining rate limit capacity by provider");
+        describe_gauge!(
+            "omnisearch_rate_limiter_remaining",
+            "Remaining rate limit capacity by provider"
+        );
     }
 
     pub async fn record_request(&self, metrics: RequestMetrics) {
@@ -75,7 +103,7 @@ impl MetricsCollector {
 
         // Update Prometheus metrics
         counter!("omnisearch_requests_total", 1, "provider" => provider.clone());
-        
+
         if metrics.success {
             counter!("omnisearch_requests_successful_total", 1, "provider" => provider.clone());
         } else {
@@ -89,7 +117,7 @@ impl MetricsCollector {
         }
 
         histogram!("omnisearch_request_duration_seconds", duration_seconds, "provider" => provider.clone());
-        
+
         if let Some(size) = metrics.response_size {
             histogram!("omnisearch_response_size_bytes", size as f64, "provider" => provider.clone());
         }
@@ -97,33 +125,36 @@ impl MetricsCollector {
         // Update internal stats
         let mut stats = self.stats.write().await;
         let provider_stats = stats.entry(provider.clone()).or_default();
-        
+
         provider_stats.total_requests += 1;
         if metrics.success {
             provider_stats.successful_requests += 1;
         } else {
             provider_stats.failed_requests += 1;
         }
-        
+
         if metrics.cache_hit {
             provider_stats.cache_hits += 1;
         }
-        
+
         provider_stats.total_duration += metrics.duration;
         provider_stats.avg_response_time = Duration::from_nanos(
-            (provider_stats.total_duration.as_nanos() / provider_stats.total_requests as u128) as u64
+            (provider_stats.total_duration.as_nanos() / provider_stats.total_requests as u128)
+                as u64,
         );
         provider_stats.last_request_time = Some(Instant::now());
 
-        debug!("Recorded metrics for provider {}: success={}, duration={:?}", 
-               provider, metrics.success, metrics.duration);
+        debug!(
+            "Recorded metrics for provider {}: success={}, duration={:?}",
+            provider, metrics.success, metrics.duration
+        );
     }
 
     pub async fn record_cache_size(&self, size: usize) {
         if !self.enabled {
             return;
         }
-        
+
         gauge!("omnisearch_cache_size", size as f64);
     }
 
@@ -131,7 +162,7 @@ impl MetricsCollector {
         if !self.enabled {
             return;
         }
-        
+
         gauge!("omnisearch_active_providers", count as f64);
     }
 
@@ -139,7 +170,7 @@ impl MetricsCollector {
         if !self.enabled {
             return;
         }
-        
+
         gauge!("omnisearch_rate_limiter_remaining", remaining as f64, "provider" => provider.to_string());
     }
 
@@ -147,7 +178,7 @@ impl MetricsCollector {
         if !self.enabled {
             return None;
         }
-        
+
         let stats = self.stats.read().await;
         stats.get(provider).cloned()
     }
@@ -156,7 +187,7 @@ impl MetricsCollector {
         if !self.enabled {
             return HashMap::new();
         }
-        
+
         let stats = self.stats.read().await;
         stats.clone()
     }
@@ -167,7 +198,7 @@ impl MetricsCollector {
         }
 
         let mut stats = self.stats.write().await;
-        
+
         match provider {
             Some(p) => {
                 stats.remove(p);
@@ -178,7 +209,7 @@ impl MetricsCollector {
                 info!("Reset all provider stats");
             }
         }
-        
+
         Ok(())
     }
 
@@ -211,10 +242,10 @@ impl MetricsMiddleware {
         let start = Instant::now();
         let result = request().await;
         let duration = start.elapsed();
-        
+
         let success = result.is_ok();
         let response_size = None; // Could be enhanced to measure actual response size
-        
+
         let metrics = RequestMetrics {
             provider: provider.to_string(),
             operation: operation.to_string(),
@@ -223,9 +254,9 @@ impl MetricsMiddleware {
             response_size,
             cache_hit,
         };
-        
+
         self.collector.record_request(metrics).await;
-        
+
         result
     }
 }
@@ -233,9 +264,8 @@ impl MetricsMiddleware {
 // Global metrics collector
 use once_cell::sync::Lazy;
 
-pub static METRICS_COLLECTOR: Lazy<Arc<MetricsCollector>> = Lazy::new(|| {
-    Arc::new(MetricsCollector::new())
-});
+pub static METRICS_COLLECTOR: Lazy<Arc<MetricsCollector>> =
+    Lazy::new(|| Arc::new(MetricsCollector::new()));
 
 // Convenience functions
 pub async fn record_request_metrics(
@@ -254,7 +284,7 @@ pub async fn record_request_metrics(
         response_size,
         cache_hit,
     };
-    
+
     METRICS_COLLECTOR.record_request(metrics).await;
 }
 
@@ -275,7 +305,7 @@ pub fn get_metrics_middleware() -> MetricsMiddleware {
 pub async fn setup_metrics_exporter() -> Result<()> {
     use metrics_exporter_prometheus::PrometheusBuilder;
     use std::net::SocketAddr;
-    
+
     if !CONFIG.metrics.enabled {
         info!("Metrics disabled, skipping Prometheus setup");
         return Ok(());
@@ -310,7 +340,7 @@ mod tests {
     #[tokio::test]
     async fn test_metrics_collection() {
         let collector = MetricsCollector::new();
-        
+
         let metrics = RequestMetrics {
             provider: "test_provider".to_string(),
             operation: "search".to_string(),
@@ -319,9 +349,9 @@ mod tests {
             response_size: Some(1024),
             cache_hit: false,
         };
-        
+
         collector.record_request(metrics).await;
-        
+
         if collector.is_enabled() {
             let stats = collector.get_provider_stats("test_provider").await.unwrap();
             assert_eq!(stats.total_requests, 1);
@@ -335,17 +365,16 @@ mod tests {
     async fn test_metrics_middleware() {
         let collector = Arc::new(MetricsCollector::new());
         let middleware = MetricsMiddleware::new(collector.clone());
-        
-        let result = middleware.time_request(
-            "test_provider",
-            "search",
-            false,
-            || async { Ok::<&str, eyre::Error>("success") }
-        ).await;
-        
+
+        let result = middleware
+            .time_request("test_provider", "search", false, || async {
+                Ok::<&str, eyre::Error>("success")
+            })
+            .await;
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "success");
-        
+
         if collector.is_enabled() {
             let stats = collector.get_provider_stats("test_provider").await.unwrap();
             assert_eq!(stats.total_requests, 1);
@@ -356,7 +385,7 @@ mod tests {
     #[tokio::test]
     async fn test_failed_request_metrics() {
         let collector = MetricsCollector::new();
-        
+
         let metrics = RequestMetrics {
             provider: "test_provider".to_string(),
             operation: "search".to_string(),
@@ -365,9 +394,9 @@ mod tests {
             response_size: None,
             cache_hit: false,
         };
-        
+
         collector.record_request(metrics).await;
-        
+
         if collector.is_enabled() {
             let stats = collector.get_provider_stats("test_provider").await.unwrap();
             assert_eq!(stats.total_requests, 1);
@@ -379,7 +408,7 @@ mod tests {
     #[tokio::test]
     async fn test_stats_reset() {
         let collector = MetricsCollector::new();
-        
+
         let metrics = RequestMetrics {
             provider: "test_provider".to_string(),
             operation: "search".to_string(),
@@ -388,12 +417,12 @@ mod tests {
             response_size: Some(1024),
             cache_hit: true,
         };
-        
+
         collector.record_request(metrics).await;
-        
+
         // Reset specific provider
         collector.reset_stats(Some("test_provider")).await.unwrap();
-        
+
         let stats = collector.get_provider_stats("test_provider").await;
         assert!(stats.is_none());
     }

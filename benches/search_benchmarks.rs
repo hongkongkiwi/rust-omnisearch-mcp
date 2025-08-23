@@ -1,9 +1,11 @@
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput};
+use criterion::{
+    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
+};
 use omnisearch_mcp::{
     common::{
         cache::{CacheManager, MemoryCache},
         types::{BaseSearchParams, SearchResult},
-        validation::{validate_search_params, sanitize_query},
+        validation::{sanitize_query, validate_search_params},
     },
     config::{CacheConfig, CacheType},
 };
@@ -37,10 +39,10 @@ fn create_test_params(query: &str, limit: Option<u32>) -> BaseSearchParams {
 // Benchmark cache operations
 fn bench_cache_operations(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     let mut group = c.benchmark_group("cache_operations");
     group.throughput(Throughput::Elements(1));
-    
+
     // Memory cache benchmarks
     let config = CacheConfig {
         enabled: true,
@@ -49,37 +51,48 @@ fn bench_cache_operations(c: &mut Criterion) {
         max_entries: 10000,
         redis: Default::default(),
     };
-    
+
     let cache = MemoryCache::new(&config);
-    
+
     // Benchmark cache set operations with different result sizes
     for size in [1, 10, 50, 100, 500].iter() {
         let test_results = create_test_results(*size);
-        
+
         group.bench_with_input(
             BenchmarkId::new("memory_cache_set", size),
             size,
             |b, &_size| {
                 b.to_async(&rt).iter_batched(
-                    || (format!("test_key_{}", fastrand::u64(..)), test_results.clone()),
+                    || {
+                        (
+                            format!("test_key_{}", fastrand::u64(..)),
+                            test_results.clone(),
+                        )
+                    },
                     |(key, results)| async move {
-                        cache.set(&key, results, Duration::from_secs(60)).await.unwrap();
+                        cache
+                            .set(&key, results, Duration::from_secs(60))
+                            .await
+                            .unwrap();
                     },
                     BatchSize::SmallInput,
                 );
             },
         );
     }
-    
+
     // Pre-populate cache for get benchmarks
     rt.block_on(async {
         for i in 0..1000 {
             let key = format!("bench_key_{}", i);
             let results = create_test_results(10);
-            cache.set(&key, results, Duration::from_secs(60)).await.unwrap();
+            cache
+                .set(&key, results, Duration::from_secs(60))
+                .await
+                .unwrap();
         }
     });
-    
+
     // Benchmark cache get operations
     group.bench_function("memory_cache_get_hit", |b| {
         b.to_async(&rt).iter_batched(
@@ -91,7 +104,7 @@ fn bench_cache_operations(c: &mut Criterion) {
             BatchSize::SmallInput,
         );
     });
-    
+
     group.bench_function("memory_cache_get_miss", |b| {
         b.to_async(&rt).iter_batched(
             || format!("missing_key_{}", fastrand::u64(..)),
@@ -102,7 +115,7 @@ fn bench_cache_operations(c: &mut Criterion) {
             BatchSize::SmallInput,
         );
     });
-    
+
     group.finish();
 }
 
@@ -110,31 +123,27 @@ fn bench_cache_operations(c: &mut Criterion) {
 fn bench_cache_key_generation(c: &mut Criterion) {
     let mut group = c.benchmark_group("cache_key_generation");
     group.throughput(Throughput::Elements(1));
-    
+
     let test_queries = vec![
         "simple query",
         "longer query with more words and complexity",
         "query with special characters: @#$%^&*()",
         &"x".repeat(500), // Long query
     ];
-    
+
     for (i, query) in test_queries.iter().enumerate() {
-        group.bench_with_input(
-            BenchmarkId::new("generate_key", i),
-            query,
-            |b, query| {
-                b.iter(|| {
-                    let key = CacheManager::generate_cache_key(
-                        "test_provider",
-                        query,
-                        "limit=10&domains=github.com",
-                    );
-                    black_box(key);
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("generate_key", i), query, |b, query| {
+            b.iter(|| {
+                let key = CacheManager::generate_cache_key(
+                    "test_provider",
+                    query,
+                    "limit=10&domains=github.com",
+                );
+                black_box(key);
+            });
+        });
     }
-    
+
     group.finish();
 }
 
@@ -142,13 +151,13 @@ fn bench_cache_key_generation(c: &mut Criterion) {
 fn bench_validation(c: &mut Criterion) {
     let mut group = c.benchmark_group("validation");
     group.throughput(Throughput::Elements(1));
-    
+
     let test_cases = vec![
         create_test_params("simple query", Some(10)),
         create_test_params("longer query with multiple words and complexity", Some(50)),
         create_test_params(&"word ".repeat(100), Some(100)),
     ];
-    
+
     for (i, params) in test_cases.iter().enumerate() {
         group.bench_with_input(
             BenchmarkId::new("validate_params", i),
@@ -161,7 +170,7 @@ fn bench_validation(c: &mut Criterion) {
             },
         );
     }
-    
+
     group.finish();
 }
 
@@ -169,37 +178,37 @@ fn bench_validation(c: &mut Criterion) {
 fn bench_query_sanitization(c: &mut Criterion) {
     let mut group = c.benchmark_group("query_sanitization");
     group.throughput(Throughput::Elements(1));
-    
+
     let test_queries = vec![
         "clean query",
         "query\0with\x01control\x7fcharacters",
-        &format!("{}dirty query with nulls{}", "\0".repeat(10), "\x01".repeat(10)),
+        &format!(
+            "{}dirty query with nulls{}",
+            "\0".repeat(10),
+            "\x01".repeat(10)
+        ),
         &"test ".repeat(200), // Long query
     ];
-    
+
     for (i, query) in test_queries.iter().enumerate() {
-        group.bench_with_input(
-            BenchmarkId::new("sanitize_query", i),
-            query,
-            |b, query| {
-                b.iter(|| {
-                    let sanitized = sanitize_query(query);
-                    black_box(sanitized);
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("sanitize_query", i), query, |b, query| {
+            b.iter(|| {
+                let sanitized = sanitize_query(query);
+                black_box(sanitized);
+            });
+        });
     }
-    
+
     group.finish();
 }
 
 // Benchmark search result processing
 fn bench_search_result_processing(c: &mut Criterion) {
     let mut group = c.benchmark_group("search_result_processing");
-    
+
     for size in [10, 50, 100, 500, 1000].iter() {
         let results = create_test_results(*size);
-        
+
         group.throughput(Throughput::Elements(*size as u64));
         group.bench_with_input(
             BenchmarkId::new("serialize_results", size),
@@ -211,7 +220,7 @@ fn bench_search_result_processing(c: &mut Criterion) {
                 });
             },
         );
-        
+
         // Benchmark deserialization
         let serialized = serde_json::to_string(&results).unwrap();
         group.bench_with_input(
@@ -225,17 +234,17 @@ fn bench_search_result_processing(c: &mut Criterion) {
             },
         );
     }
-    
+
     group.finish();
 }
 
 // Benchmark concurrent cache access
 fn bench_concurrent_cache_access(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     let mut group = c.benchmark_group("concurrent_cache_access");
     group.sample_size(50); // Reduce sample size for async benchmarks
-    
+
     let config = CacheConfig {
         enabled: true,
         cache_type: CacheType::Memory,
@@ -243,18 +252,21 @@ fn bench_concurrent_cache_access(c: &mut Criterion) {
         max_entries: 10000,
         redis: Default::default(),
     };
-    
+
     let cache = MemoryCache::new(&config);
-    
+
     // Pre-populate cache
     rt.block_on(async {
         for i in 0..100 {
             let key = format!("concurrent_key_{}", i);
             let results = create_test_results(10);
-            cache.set(&key, results, Duration::from_secs(60)).await.unwrap();
+            cache
+                .set(&key, results, Duration::from_secs(60))
+                .await
+                .unwrap();
         }
     });
-    
+
     group.bench_function("concurrent_reads", |b| {
         b.to_async(&rt).iter(|| async {
             let tasks: Vec<_> = (0..10)
@@ -266,22 +278,22 @@ fn bench_concurrent_cache_access(c: &mut Criterion) {
                     }
                 })
                 .collect();
-            
+
             let results = futures::future::join_all(tasks).await;
             black_box(results);
         });
     });
-    
+
     group.finish();
 }
 
 // Comprehensive search simulation
 fn bench_search_simulation(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     let mut group = c.benchmark_group("search_simulation");
     group.sample_size(20); // Reduce sample size for comprehensive benchmarks
-    
+
     let config = CacheConfig {
         enabled: true,
         cache_type: CacheType::Memory,
@@ -289,9 +301,9 @@ fn bench_search_simulation(c: &mut Criterion) {
         max_entries: 1000,
         redis: Default::default(),
     };
-    
+
     let cache = MemoryCache::new(&config);
-    
+
     group.bench_function("full_search_pipeline", |b| {
         b.to_async(&rt).iter_batched(
             || {
@@ -304,36 +316,38 @@ fn bench_search_simulation(c: &mut Criterion) {
                 // 1. Create and validate search params
                 let params = create_test_params(&query, Some(limit));
                 let validated = validate_search_params(&params).unwrap();
-                
+
                 // 2. Generate cache key
                 let cache_key = CacheManager::generate_cache_key(
                     "benchmark_provider",
                     &validated.query,
                     &format!("limit={:?}", validated.limit),
                 );
-                
+
                 // 3. Check cache
                 let cached_result = cache.get(&cache_key).await.unwrap();
-                
+
                 let results = if cached_result.is_some() {
                     cached_result.unwrap()
                 } else {
                     // 4. Simulate search (create mock results)
                     let mock_results = create_test_results(limit as usize);
-                    
+
                     // 5. Cache results
-                    cache.set(&cache_key, mock_results.clone(), Duration::from_secs(60))
-                        .await.unwrap();
-                    
+                    cache
+                        .set(&cache_key, mock_results.clone(), Duration::from_secs(60))
+                        .await
+                        .unwrap();
+
                     mock_results
                 };
-                
+
                 black_box(results);
             },
             BatchSize::SmallInput,
         );
     });
-    
+
     group.finish();
 }
 

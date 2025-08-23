@@ -1,16 +1,20 @@
-use std::{collections::HashMap, sync::Arc, time::{Duration, Instant}};
-use tokio::sync::RwLock;
-use tracing::{debug, warn, error, info};
-use eyre::{Result, eyre};
 use async_trait::async_trait;
+use eyre::{eyre, Result};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, Instant},
+};
+use tokio::sync::RwLock;
+use tracing::{debug, error, info, warn};
 
 use crate::config::CONFIG;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CircuitState {
-    Closed,    // Normal operation
-    Open,      // Failing, requests rejected
-    HalfOpen,  // Testing if service recovered
+    Closed,   // Normal operation
+    Open,     // Failing, requests rejected
+    HalfOpen, // Testing if service recovered
 }
 
 #[derive(Debug, Clone)]
@@ -30,7 +34,7 @@ pub trait CircuitBreakerProvider: Send + Sync {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<T>> + Send,
         T: Send + 'static;
-    
+
     async fn get_stats(&self, provider: &str) -> Option<CircuitBreakerStats>;
     async fn reset(&self, provider: &str) -> Result<()>;
 }
@@ -48,7 +52,11 @@ pub struct CircuitBreaker {
 }
 
 impl CircuitBreaker {
-    pub fn new(failure_threshold: u32, timeout_duration: Duration, half_open_max_calls: u32) -> Self {
+    pub fn new(
+        failure_threshold: u32,
+        timeout_duration: Duration,
+        half_open_max_calls: u32,
+    ) -> Self {
         Self {
             failure_threshold,
             timeout_duration,
@@ -70,19 +78,31 @@ impl CircuitBreaker {
         match self.state {
             CircuitState::Open => {
                 if self.should_attempt_reset() {
-                    debug!("Circuit breaker transitioning to half-open for provider: {}", provider);
+                    debug!(
+                        "Circuit breaker transitioning to half-open for provider: {}",
+                        provider
+                    );
                     self.state = CircuitState::HalfOpen;
                     self.state_changed_at = Instant::now();
                     self.half_open_calls = 0;
                 } else {
-                    debug!("Circuit breaker is open, rejecting call for provider: {}", provider);
+                    debug!(
+                        "Circuit breaker is open, rejecting call for provider: {}",
+                        provider
+                    );
                     return Err(eyre!("Circuit breaker is open for provider: {}", provider));
                 }
             }
             CircuitState::HalfOpen => {
                 if self.half_open_calls >= self.half_open_max_calls {
-                    debug!("Circuit breaker half-open call limit reached for provider: {}", provider);
-                    return Err(eyre!("Circuit breaker half-open call limit reached for provider: {}", provider));
+                    debug!(
+                        "Circuit breaker half-open call limit reached for provider: {}",
+                        provider
+                    );
+                    return Err(eyre!(
+                        "Circuit breaker half-open call limit reached for provider: {}",
+                        provider
+                    ));
                 }
                 self.half_open_calls += 1;
             }
@@ -105,10 +125,13 @@ impl CircuitBreaker {
 
     async fn on_success(&mut self, provider: &str) {
         self.success_count += 1;
-        
+
         match self.state {
             CircuitState::HalfOpen => {
-                debug!("Circuit breaker success in half-open state for provider: {}", provider);
+                debug!(
+                    "Circuit breaker success in half-open state for provider: {}",
+                    provider
+                );
                 self.state = CircuitState::Closed;
                 self.state_changed_at = Instant::now();
                 self.failure_count = 0;
@@ -118,13 +141,19 @@ impl CircuitBreaker {
             CircuitState::Closed => {
                 // Reset failure count on success in closed state
                 if self.failure_count > 0 {
-                    debug!("Resetting failure count for provider: {} after success", provider);
+                    debug!(
+                        "Resetting failure count for provider: {} after success",
+                        provider
+                    );
                     self.failure_count = 0;
                 }
             }
             CircuitState::Open => {
                 // Should not happen
-                warn!("Unexpected success in open state for provider: {}", provider);
+                warn!(
+                    "Unexpected success in open state for provider: {}",
+                    provider
+                );
             }
         }
     }
@@ -132,33 +161,45 @@ impl CircuitBreaker {
     async fn on_failure(&mut self, provider: &str) {
         self.failure_count += 1;
         self.last_failure_time = Some(Instant::now());
-        
-        debug!("Circuit breaker failure #{} for provider: {}", self.failure_count, provider);
+
+        debug!(
+            "Circuit breaker failure #{} for provider: {}",
+            self.failure_count, provider
+        );
 
         match self.state {
             CircuitState::Closed => {
                 if self.failure_count >= self.failure_threshold {
-                    warn!("Circuit breaker opening for provider: {} after {} failures", provider, self.failure_count);
+                    warn!(
+                        "Circuit breaker opening for provider: {} after {} failures",
+                        provider, self.failure_count
+                    );
                     self.state = CircuitState::Open;
                     self.state_changed_at = Instant::now();
                 }
             }
             CircuitState::HalfOpen => {
-                warn!("Circuit breaker reopening for provider: {} after failure in half-open state", provider);
+                warn!(
+                    "Circuit breaker reopening for provider: {} after failure in half-open state",
+                    provider
+                );
                 self.state = CircuitState::Open;
                 self.state_changed_at = Instant::now();
                 self.half_open_calls = 0;
             }
             CircuitState::Open => {
                 // Already open, just log
-                debug!("Additional failure in open state for provider: {}", provider);
+                debug!(
+                    "Additional failure in open state for provider: {}",
+                    provider
+                );
             }
         }
     }
 
     fn should_attempt_reset(&self) -> bool {
-        matches!(self.state, CircuitState::Open) &&
-        self.state_changed_at.elapsed() >= self.timeout_duration
+        matches!(self.state, CircuitState::Open)
+            && self.state_changed_at.elapsed() >= self.timeout_duration
     }
 
     pub fn get_stats(&self, provider: &str) -> CircuitBreakerStats {
@@ -193,7 +234,7 @@ pub struct CircuitBreakerManager {
 impl CircuitBreakerManager {
     pub fn new() -> Self {
         let config = &CONFIG.circuit_breaker;
-        
+
         Self {
             breakers: Arc::new(RwLock::new(HashMap::new())),
             enabled: config.enabled,
@@ -205,7 +246,7 @@ impl CircuitBreakerManager {
 
     async fn get_or_create_breaker(&self, provider: &str) -> Arc<RwLock<CircuitBreaker>> {
         let mut breakers = self.breakers.write().await;
-        
+
         if !breakers.contains_key(provider) {
             let breaker = CircuitBreaker::new(
                 self.failure_threshold,
@@ -220,7 +261,7 @@ impl CircuitBreakerManager {
         // but we can't clone the CircuitBreaker directly due to the HashMap structure
         // Instead, we'll use a different approach
         drop(breakers);
-        
+
         let breakers = self.breakers.read().await;
         // We'll need to restructure this - for now, let's use a different approach
         Arc::new(RwLock::new(CircuitBreaker::new(
@@ -244,7 +285,7 @@ impl CircuitBreakerProvider for CircuitBreakerManager {
         }
 
         let mut breakers = self.breakers.write().await;
-        
+
         if !breakers.contains_key(provider) {
             let breaker = CircuitBreaker::new(
                 self.failure_threshold,
@@ -265,7 +306,9 @@ impl CircuitBreakerProvider for CircuitBreakerManager {
         }
 
         let breakers = self.breakers.read().await;
-        breakers.get(provider).map(|breaker| breaker.get_stats(provider))
+        breakers
+            .get(provider)
+            .map(|breaker| breaker.get_stats(provider))
     }
 
     async fn reset(&self, provider: &str) -> Result<()> {
@@ -278,7 +321,7 @@ impl CircuitBreakerProvider for CircuitBreakerManager {
             breaker.reset();
             info!("Reset circuit breaker for provider: {}", provider);
         }
-        
+
         Ok(())
     }
 }
@@ -286,7 +329,8 @@ impl CircuitBreakerProvider for CircuitBreakerManager {
 // Global circuit breaker manager
 use once_cell::sync::Lazy;
 
-pub static CIRCUIT_BREAKER_MANAGER: Lazy<CircuitBreakerManager> = Lazy::new(CircuitBreakerManager::new);
+pub static CIRCUIT_BREAKER_MANAGER: Lazy<CircuitBreakerManager> =
+    Lazy::new(CircuitBreakerManager::new);
 
 // Convenience functions
 pub async fn call_with_circuit_breaker<F, Fut, T>(provider: &str, operation: F) -> Result<T>
@@ -314,7 +358,7 @@ mod tests {
     #[tokio::test]
     async fn test_circuit_breaker_closed_state() {
         let mut breaker = CircuitBreaker::new(3, Duration::from_secs(60), 2);
-        
+
         // Should allow calls in closed state
         let result = breaker.call("test", || async { Ok("success") }).await;
         assert!(result.is_ok());
@@ -325,41 +369,46 @@ mod tests {
     #[tokio::test]
     async fn test_circuit_breaker_open_state() {
         let mut breaker = CircuitBreaker::new(2, Duration::from_millis(100), 2);
-        
+
         // Trigger failures to open the breaker
-        let _result1 = breaker.call("test", || async { 
-            Err::<(), _>(eyre!("error 1")) 
-        }).await;
-        
-        let _result2 = breaker.call("test", || async { 
-            Err::<(), _>(eyre!("error 2")) 
-        }).await;
-        
+        let _result1 = breaker
+            .call("test", || async { Err::<(), _>(eyre!("error 1")) })
+            .await;
+
+        let _result2 = breaker
+            .call("test", || async { Err::<(), _>(eyre!("error 2")) })
+            .await;
+
         assert_eq!(breaker.state, CircuitState::Open);
-        
+
         // Next call should be rejected
-        let result3 = breaker.call("test", || async { Ok("should not execute") }).await;
+        let result3 = breaker
+            .call("test", || async { Ok("should not execute") })
+            .await;
         assert!(result3.is_err());
-        assert!(result3.unwrap_err().to_string().contains("Circuit breaker is open"));
+        assert!(result3
+            .unwrap_err()
+            .to_string()
+            .contains("Circuit breaker is open"));
     }
 
     #[tokio::test]
     async fn test_circuit_breaker_half_open_state() {
         let mut breaker = CircuitBreaker::new(2, Duration::from_millis(50), 2);
-        
+
         // Open the breaker
-        let _result1 = breaker.call("test", || async { 
-            Err::<(), _>(eyre!("error 1")) 
-        }).await;
-        let _result2 = breaker.call("test", || async { 
-            Err::<(), _>(eyre!("error 2")) 
-        }).await;
-        
+        let _result1 = breaker
+            .call("test", || async { Err::<(), _>(eyre!("error 1")) })
+            .await;
+        let _result2 = breaker
+            .call("test", || async { Err::<(), _>(eyre!("error 2")) })
+            .await;
+
         assert_eq!(breaker.state, CircuitState::Open);
-        
+
         // Wait for timeout
         tokio::time::sleep(Duration::from_millis(60)).await;
-        
+
         // Next call should transition to half-open
         let result = breaker.call("test", || async { Ok("success") }).await;
         assert!(result.is_ok());
@@ -369,18 +418,20 @@ mod tests {
     #[tokio::test]
     async fn test_circuit_breaker_manager() {
         let manager = CircuitBreakerManager::new();
-        
+
         let counter = Arc::new(AtomicU32::new(0));
         let counter_clone = Arc::clone(&counter);
-        
-        let result = manager.call("test_provider", || {
-            let counter = Arc::clone(&counter_clone);
-            async move {
-                counter.fetch_add(1, Ordering::SeqCst);
-                Ok("success")
-            }
-        }).await;
-        
+
+        let result = manager
+            .call("test_provider", || {
+                let counter = Arc::clone(&counter_clone);
+                async move {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                    Ok("success")
+                }
+            })
+            .await;
+
         assert!(result.is_ok());
         assert_eq!(counter.load(Ordering::SeqCst), 1);
     }
@@ -394,13 +445,18 @@ mod tests {
             timeout_duration: Duration::from_secs(60),
             half_open_max_calls: 2,
         };
-        
-        let result = manager.call("test_provider", || async {
-            Err::<(), _>(eyre!("This should still execute when disabled"))
-        }).await;
-        
+
+        let result = manager
+            .call("test_provider", || async {
+                Err::<(), _>(eyre!("This should still execute when disabled"))
+            })
+            .await;
+
         // Should execute and return the error (not circuit breaker error)
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("This should still execute"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("This should still execute"));
     }
 }

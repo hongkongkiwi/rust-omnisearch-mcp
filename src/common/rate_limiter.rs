@@ -1,12 +1,16 @@
-use governor::{Quota, RateLimiter as GovernorLimiter, state::{InMemoryState, NotKeyed}};
-use std::{collections::HashMap, sync::Arc, time::Duration, num::NonZeroU32};
+use eyre::{eyre, Result};
+use governor::{
+    state::{InMemoryState, NotKeyed},
+    Quota, RateLimiter as GovernorLimiter,
+};
+use std::{collections::HashMap, num::NonZeroU32, sync::Arc, time::Duration};
 use tokio::sync::RwLock;
 use tracing::{debug, warn};
-use eyre::{Result, eyre};
 
 use crate::config::CONFIG;
 
-pub type ProviderRateLimiter = GovernorLimiter<NotKeyed, InMemoryState, governor::clock::DefaultClock>;
+pub type ProviderRateLimiter =
+    GovernorLimiter<NotKeyed, InMemoryState, governor::clock::DefaultClock>;
 
 #[derive(Clone)]
 pub struct RateLimiterManager {
@@ -17,7 +21,7 @@ pub struct RateLimiterManager {
 impl RateLimiterManager {
     pub fn new() -> Self {
         let enabled = CONFIG.rate_limiting.enabled;
-        
+
         Self {
             limiters: Arc::new(RwLock::new(HashMap::new())),
             enabled,
@@ -32,7 +36,7 @@ impl RateLimiterManager {
         }
 
         let mut limiters = self.limiters.write().await;
-        
+
         if let Some(limiter) = limiters.get(provider) {
             return Ok(Arc::clone(limiter));
         }
@@ -41,14 +45,17 @@ impl RateLimiterManager {
         let rate_limit = self.get_provider_rate_limit(provider);
         let quota = Quota::per_minute(
             NonZeroU32::new(rate_limit)
-                .ok_or_else(|| eyre!("Rate limit must be greater than 0"))?
+                .ok_or_else(|| eyre!("Rate limit must be greater than 0"))?,
         );
-        
+
         let limiter = Arc::new(GovernorLimiter::direct(quota));
         limiters.insert(provider.to_string(), Arc::clone(&limiter));
-        
-        debug!("Created rate limiter for provider '{}' with {} requests/minute", provider, rate_limit);
-        
+
+        debug!(
+            "Created rate limiter for provider '{}' with {} requests/minute",
+            provider, rate_limit
+        );
+
         Ok(limiter)
     }
 
@@ -79,7 +86,7 @@ impl RateLimiterManager {
         }
 
         let limiter = self.get_or_create_limiter(provider).await?;
-        
+
         match limiter.check() {
             Ok(_) => {
                 debug!("Rate limit check passed for provider: {}", provider);
@@ -98,7 +105,7 @@ impl RateLimiterManager {
         }
 
         let limiter = self.get_or_create_limiter(provider).await?;
-        
+
         match limiter.until_ready().await {
             Ok(_) => {
                 debug!("Rate limit wait completed for provider: {}", provider);
@@ -106,7 +113,11 @@ impl RateLimiterManager {
             }
             Err(e) => {
                 warn!("Rate limit wait failed for provider {}: {}", provider, e);
-                Err(eyre!("Rate limit wait failed for provider {}: {}", provider, e))
+                Err(eyre!(
+                    "Rate limit wait failed for provider {}: {}",
+                    provider,
+                    e
+                ))
             }
         }
     }
@@ -170,17 +181,23 @@ mod tests {
     #[tokio::test]
     async fn test_rate_limiter_creation() {
         let manager = RateLimiterManager::new();
-        let limiter = manager.get_or_create_limiter("test_provider").await.unwrap();
-        
+        let limiter = manager
+            .get_or_create_limiter("test_provider")
+            .await
+            .unwrap();
+
         // Should get the same limiter instance for the same provider
-        let limiter2 = manager.get_or_create_limiter("test_provider").await.unwrap();
+        let limiter2 = manager
+            .get_or_create_limiter("test_provider")
+            .await
+            .unwrap();
         assert!(Arc::ptr_eq(&limiter, &limiter2));
     }
 
     #[tokio::test]
     async fn test_rate_limiting_behavior() {
         let manager = RateLimiterManager::new();
-        
+
         // This test would need a very low rate limit to be practical
         // In real scenarios, you'd set up a test config
         let result = manager.check_rate_limit("tavily").await;
@@ -190,13 +207,16 @@ mod tests {
     #[tokio::test]
     async fn test_rate_limiter_stats() {
         let manager = RateLimiterManager::new();
-        
+
         // Create a limiter
-        let _limiter = manager.get_or_create_limiter("test_provider").await.unwrap();
-        
+        let _limiter = manager
+            .get_or_create_limiter("test_provider")
+            .await
+            .unwrap();
+
         // Get stats
         let stats = manager.get_limiter_stats("test_provider").await.unwrap();
-        
+
         if manager.enabled {
             assert!(stats.is_some());
             let stats = stats.unwrap();
@@ -212,11 +232,11 @@ mod tests {
             limiters: Arc::new(RwLock::new(HashMap::new())),
             enabled: false,
         };
-        
+
         // When disabled, all operations should pass
         assert!(manager.check_rate_limit("any_provider").await.is_ok());
         assert!(manager.wait_for_rate_limit("any_provider").await.is_ok());
-        
+
         let stats = manager.get_limiter_stats("any_provider").await.unwrap();
         assert!(stats.is_none());
     }
