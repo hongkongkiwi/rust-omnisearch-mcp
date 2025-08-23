@@ -1,6 +1,4 @@
-use crate::{
-    common::provider_factory::ProviderFactory, config::CONFIG,
-};
+use crate::{common::provider_factory::ProviderFactory, config::CONFIG};
 
 #[cfg(feature = "server")]
 use crate::server::register_search_provider;

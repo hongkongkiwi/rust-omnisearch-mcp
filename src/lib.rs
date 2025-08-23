@@ -57,9 +57,7 @@ pub mod providers;
 pub mod server;
 
 // Re-export common types for library users
-pub use common::types::{
-    BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult,
-};
+pub use common::types::{BaseSearchParams, ErrorType, ProviderError, SearchProvider, SearchResult};
 
 // Re-export configuration functions
 pub use config::{validate_config, Config, CONFIG};
@@ -102,15 +100,17 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub async fn initialize() -> Result<Vec<Box<dyn SearchProvider>>, ProviderError> {
     // Initialize tracing for library users
     tracing_subscriber::fmt::init();
-    
+
     // Validate configuration
-    validate_config().map_err(|e| ProviderError::new(
-        crate::common::types::ErrorType::ApiError,
-        format!("Configuration validation failed: {}", e),
-        "omnisearch".to_string(),
-        None,
-    ))?;
-    
+    validate_config().map_err(|e| {
+        ProviderError::new(
+            crate::common::types::ErrorType::ApiError,
+            format!("Configuration validation failed: {}", e),
+            "omnisearch".to_string(),
+            None,
+        )
+    })?;
+
     // Initialize and return available providers
     Ok(create_providers())
 }

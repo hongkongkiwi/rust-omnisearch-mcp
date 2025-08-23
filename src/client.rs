@@ -27,8 +27,8 @@ use std::collections::HashMap;
 ///     
 ///     let response = client.search(request).await?;
 ///     
-///     println!("Found {} results from {} providers", 
-///         response.results.len(), 
+///     println!("Found {} results from {} providers",
+///         response.results.len(),
 ///         response.providers_used.len());
 ///     
 ///     for result in response.results {
@@ -53,16 +53,18 @@ impl OmnisearchClient {
     /// Returns an error if configuration validation fails or no providers can be initialized.
     pub async fn new() -> Result<Self, ProviderError> {
         // Validate configuration first
-        validate_config().map_err(|e| ProviderError::new(
-            crate::common::types::ErrorType::ApiError,
-            format!("Configuration validation failed: {}", e),
-            "client".to_string(),
-            None,
-        ))?;
-        
+        validate_config().map_err(|e| {
+            ProviderError::new(
+                crate::common::types::ErrorType::ApiError,
+                format!("Configuration validation failed: {}", e),
+                "client".to_string(),
+                None,
+            )
+        })?;
+
         // Initialize providers
         let provider_list = create_providers();
-        
+
         if provider_list.is_empty() {
             return Err(ProviderError::new(
                 crate::common::types::ErrorType::ApiError,
@@ -71,31 +73,33 @@ impl OmnisearchClient {
                 None,
             ));
         }
-        
+
         // Convert to HashMap for easy access
         let mut providers = HashMap::new();
         for provider in provider_list {
             providers.insert(provider.name().to_string(), provider);
         }
-        
+
         Ok(Self { providers })
     }
-    
+
     /// Get the names of all available providers.
     pub fn available_providers(&self) -> Vec<&str> {
         self.providers.keys().map(|s| s.as_str()).collect()
     }
-    
+
     /// Check if a specific provider is available.
     pub fn has_provider(&self, name: &str) -> bool {
         self.providers.contains_key(name)
     }
-    
+
     /// Get information about a specific provider.
     pub fn provider_info(&self, name: &str) -> Option<(String, String)> {
-        self.providers.get(name).map(|p| (p.name().to_string(), p.description().to_string()))
+        self.providers
+            .get(name)
+            .map(|p| (p.name().to_string(), p.description().to_string()))
     }
-    
+
     /// Perform a search using the specified request parameters.
     ///
     /// If no specific provider is requested, this will try providers in a sensible order
@@ -104,7 +108,7 @@ impl OmnisearchClient {
         let query = request.query.clone();
         let preferred_provider = request.preferred_provider.clone();
         let params = request.into_search_params();
-        
+
         if let Some(provider_name) = &preferred_provider {
             // Use specific provider
             if let Some(provider) = self.providers.get(provider_name) {
@@ -123,11 +127,11 @@ impl OmnisearchClient {
                 ));
             }
         }
-        
+
         // Try providers in preferred order
         let provider_order = ["tavily", "google", "duckduckgo", "reddit", "exa", "brave"];
         let mut last_error = None;
-        
+
         for provider_name in provider_order {
             if let Some(provider) = self.providers.get(provider_name) {
                 match provider.search(params.clone()).await {
@@ -145,26 +149,32 @@ impl OmnisearchClient {
                 }
             }
         }
-        
+
         // If we get here, all providers failed
-        Err(last_error.unwrap_or_else(|| ProviderError::new(
-            crate::common::types::ErrorType::ProviderError,
-            "No providers available for search".to_string(),
-            "client".to_string(),
-            None,
-        )))
+        Err(last_error.unwrap_or_else(|| {
+            ProviderError::new(
+                crate::common::types::ErrorType::ProviderError,
+                "No providers available for search".to_string(),
+                "client".to_string(),
+                None,
+            )
+        }))
     }
-    
+
     /// Perform a search across multiple providers and combine results.
     ///
     /// This method will query multiple providers sequentially and return the first successful result.
     /// For true parallel searching, providers would need to implement Send + Sync.
-    pub async fn multi_search(&self, request: SearchRequest, max_providers: usize) -> Result<SearchResponse, ProviderError> {
+    pub async fn multi_search(
+        &self,
+        request: SearchRequest,
+        max_providers: usize,
+    ) -> Result<SearchResponse, ProviderError> {
         let query = request.query.clone();
         let preferred_provider = request.preferred_provider.clone();
         let params = request.into_search_params();
         let mut provider_names = Vec::new();
-        
+
         // Launch searches across available providers
         let providers_to_use: Vec<_> = if let Some(preferred) = &preferred_provider {
             if self.providers.contains_key(preferred) {
@@ -178,14 +188,18 @@ impl OmnisearchClient {
                 ));
             }
         } else {
-            self.providers.keys().take(max_providers).map(|s| s.as_str()).collect()
+            self.providers
+                .keys()
+                .take(max_providers)
+                .map(|s| s.as_str())
+                .collect()
         };
-        
+
         for provider_name in providers_to_use {
             if let Some(provider) = self.providers.get(provider_name) {
                 let params_clone = params.clone();
                 let provider_name = provider_name.to_string();
-                
+
                 // Try each provider sequentially
                 match provider.search(params_clone).await {
                     Ok(results) => {
@@ -200,7 +214,7 @@ impl OmnisearchClient {
                 }
             }
         }
-        
+
         Err(ProviderError::new(
             crate::common::types::ErrorType::ProviderError,
             "All provider searches failed".to_string(),
@@ -234,31 +248,31 @@ impl SearchRequest {
             preferred_provider: None,
         }
     }
-    
+
     /// Set the maximum number of results to return.
     pub fn limit(mut self, limit: u32) -> Self {
         self.limit = Some(limit);
         self
     }
-    
+
     /// Include only results from the specified domains.
     pub fn include_domains(mut self, domains: &[&str]) -> Self {
         self.include_domains = Some(domains.iter().map(|s| s.to_string()).collect());
         self
     }
-    
+
     /// Exclude results from the specified domains.
     pub fn exclude_domains(mut self, domains: &[&str]) -> Self {
         self.exclude_domains = Some(domains.iter().map(|s| s.to_string()).collect());
         self
     }
-    
+
     /// Prefer a specific search provider.
     pub fn provider(mut self, provider: impl Into<String>) -> Self {
         self.preferred_provider = Some(provider.into());
         self
     }
-    
+
     /// Convert this request into BaseSearchParams for use with providers.
     pub(crate) fn into_search_params(self) -> BaseSearchParams {
         BaseSearchParams {
@@ -286,12 +300,12 @@ impl SearchResponse {
     pub fn len(&self) -> usize {
         self.results.len()
     }
-    
+
     /// Check if the response is empty.
     pub fn is_empty(&self) -> bool {
         self.results.is_empty()
     }
-    
+
     /// Get results from a specific provider.
     pub fn results_from_provider(&self, provider: &str) -> Vec<&SearchResult> {
         self.results
@@ -304,26 +318,29 @@ impl SearchResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_search_request_builder() {
         let request = SearchRequest::new("test query")
             .limit(10)
             .include_domains(&["example.com", "test.org"])
             .provider("tavily");
-        
+
         assert_eq!(request.query, "test query");
         assert_eq!(request.limit, Some(10));
         assert_eq!(request.preferred_provider, Some("tavily".to_string()));
-        assert_eq!(request.include_domains, Some(vec!["example.com".to_string(), "test.org".to_string()]));
+        assert_eq!(
+            request.include_domains,
+            Some(vec!["example.com".to_string(), "test.org".to_string()])
+        );
     }
-    
+
     #[test]
     fn test_search_params_conversion() {
         let request = SearchRequest::new("test")
             .limit(5)
             .exclude_domains(&["spam.com"]);
-        
+
         let params = request.into_search_params();
         assert_eq!(params.query, "test");
         assert_eq!(params.limit, Some(5));
