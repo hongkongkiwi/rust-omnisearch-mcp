@@ -1,7 +1,7 @@
 use eyre::Result;
 use omnisearch_mcp::{
     common::{
-        cache::{get_cache_manager, CacheManager, MemoryCache},
+        cache::{get_cache_manager, CacheManager, CacheProvider, MemoryCache},
         circuit_breaker::{call_with_circuit_breaker, get_circuit_breaker_stats},
         metrics::{record_request_metrics, METRICS_COLLECTOR},
         rate_limiter::{check_rate_limit, RATE_LIMITER_MANAGER},
@@ -57,18 +57,16 @@ async fn test_full_search_pipeline() -> Result<()> {
             SearchResult {
                 title: "Rust Programming Guide".to_string(),
                 url: "https://github.com/rust-lang/rust".to_string(),
-                snippet: Some("The Rust Programming Language".to_string()),
+                snippet: "The Rust Programming Language".to_string(),
                 score: Some(0.95),
-                published_date: None,
-                favicon_url: None,
+                source_provider: "test".to_string(),
             },
             SearchResult {
                 title: "Rust Documentation".to_string(),
                 url: "https://docs.rs/".to_string(),
-                snippet: Some("Find and view Rust crate documentation".to_string()),
+                snippet: "Find and view Rust crate documentation".to_string(),
                 score: Some(0.90),
-                published_date: None,
-                favicon_url: None,
+                source_provider: "test".to_string(),
             },
         ])
     })
@@ -119,21 +117,20 @@ async fn test_cache_performance_and_consistency() -> Result<()> {
         redis: Default::default(),
     };
 
-    let cache = MemoryCache::new(&config);
+    let cache = std::sync::Arc::new(MemoryCache::new(&config));
     let test_data = vec![SearchResult {
         title: "Performance Test".to_string(),
         url: "https://example.com/perf".to_string(),
-        snippet: Some("Performance testing data".to_string()),
+        snippet: "Performance testing data".to_string(),
         score: Some(0.8),
-        published_date: None,
-        favicon_url: None,
+        source_provider: "test".to_string(),
     }];
 
     // Test concurrent access
     let mut handles = Vec::new();
 
     for i in 0..10 {
-        let cache_clone = &cache;
+        let cache_clone = cache.clone();
         let data_clone = test_data.clone();
 
         let handle = tokio::spawn(async move {
@@ -491,16 +488,16 @@ async fn test_redis_cache_integration() -> Result<()> {
     }
 
     let client = client?;
-    let mut conn = client.get_connection()?;
+    let mut conn = client.get_async_connection().await?;
 
     // Test basic Redis operations
-    use redis::Commands;
-    conn.set("test_key", "test_value")?;
-    let result: String = conn.get("test_key")?;
+    use redis::AsyncCommands;
+    let _: () = conn.set("test_key", "test_value").await?;
+    let result: String = conn.get("test_key").await?;
     assert_eq!(result, "test_value");
 
     // Clean up
-    let _: () = conn.del("test_key")?;
+    let _: () = conn.del("test_key").await?;
 
     Ok(())
 }
