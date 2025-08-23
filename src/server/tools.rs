@@ -99,7 +99,7 @@ impl ToolRegistry {
 // Global registry instance
 static REGISTRY: Lazy<ToolRegistry> = Lazy::new(ToolRegistry::new);
 
-pub fn register_tools() -> anyhow::Result<()> {
+pub fn register_tools() -> eyre::Result<()> {
     // This would be implemented based on the rust-mcp-sdk API
     Ok(())
 }

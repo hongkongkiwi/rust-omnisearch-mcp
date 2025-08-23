@@ -423,7 +423,7 @@ mod tests {
         let counter_clone = Arc::clone(&counter);
 
         let result = manager
-            .call("test_provider", || {
+            .call("test_provider", move || {
                 let counter = Arc::clone(&counter_clone);
                 async move {
                     counter.fetch_add(1, Ordering::SeqCst);

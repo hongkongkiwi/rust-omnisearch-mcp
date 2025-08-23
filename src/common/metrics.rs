@@ -102,24 +102,24 @@ impl MetricsCollector {
         let duration_seconds = metrics.duration.as_secs_f64();
 
         // Update Prometheus metrics
-        counter!("omnisearch_requests_total", 1, "provider" => provider.clone());
+        counter!("omnisearch_requests_total", "provider" => provider.clone()).increment(1);
 
         if metrics.success {
-            counter!("omnisearch_requests_successful_total", 1, "provider" => provider.clone());
+            counter!("omnisearch_requests_successful_total", "provider" => provider.clone()).increment(1);
         } else {
-            counter!("omnisearch_requests_failed_total", 1, "provider" => provider.clone());
+            counter!("omnisearch_requests_failed_total", "provider" => provider.clone()).increment(1);
         }
 
         if metrics.cache_hit {
-            counter!("omnisearch_cache_hits_total", 1, "provider" => provider.clone());
+            counter!("omnisearch_cache_hits_total", "provider" => provider.clone()).increment(1);
         } else {
-            counter!("omnisearch_cache_misses_total", 1, "provider" => provider.clone());
+            counter!("omnisearch_cache_misses_total", "provider" => provider.clone()).increment(1);
         }
 
-        histogram!("omnisearch_request_duration_seconds", duration_seconds, "provider" => provider.clone());
+        histogram!("omnisearch_request_duration_seconds", "provider" => provider.clone()).record(duration_seconds);
 
         if let Some(size) = metrics.response_size {
-            histogram!("omnisearch_response_size_bytes", size as f64, "provider" => provider.clone());
+            histogram!("omnisearch_response_size_bytes", "provider" => provider.clone()).record(size as f64);
         }
 
         // Update internal stats

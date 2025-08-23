@@ -51,8 +51,9 @@ impl CacheProvider for MemoryCache {
     }
 
     async fn set(&self, key: &str, value: CacheValue, _ttl: Duration) -> Result<()> {
+        let len = value.len();
         self.cache.insert(key.to_string(), value).await;
-        debug!("Cached {} results for key: {}", value.len(), key);
+        debug!("Cached {} results for key: {}", len, key);
         Ok(())
     }
 
@@ -282,14 +283,16 @@ mod tests {
             SearchResult {
                 title: "Test Result 1".to_string(),
                 url: "https://example.com/1".to_string(),
-                snippet: Some("Test snippet 1".to_string()),
-                ..Default::default()
+                snippet: "Test snippet 1".to_string(),
+                score: None,
+                source_provider: "test".to_string(),
             },
             SearchResult {
                 title: "Test Result 2".to_string(),
                 url: "https://example.com/2".to_string(),
-                snippet: Some("Test snippet 2".to_string()),
-                ..Default::default()
+                snippet: "Test snippet 2".to_string(),
+                score: None,
+                source_provider: "test".to_string(),
             },
         ]
     }

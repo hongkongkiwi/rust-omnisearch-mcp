@@ -218,13 +218,14 @@ fn has_excessive_repetition(text: &str) -> bool {
     }
 
     let mut word_counts = std::collections::HashMap::new();
-    for word in words {
+    let word_len = words.len();
+    for word in &words {
         *word_counts.entry(word.to_lowercase()).or_insert(0) += 1;
     }
 
     // If any word appears more than 30% of the time, it's excessive
     let max_count = *word_counts.values().max().unwrap_or(&0);
-    max_count as f64 / words.len() as f64 > 0.3
+    max_count as f64 / word_len as f64 > 0.3
 }
 
 fn is_suspicious_domain(domain: &str) -> bool {

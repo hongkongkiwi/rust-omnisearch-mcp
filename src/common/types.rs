@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use eyre;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
@@ -125,7 +126,7 @@ pub struct ProviderError {
     pub message: String,
     pub provider: String,
     #[source]
-    pub source: Option<anyhow::Error>,
+    pub source: Option<eyre::Error>,
 }
 
 impl ProviderError {
@@ -133,7 +134,7 @@ impl ProviderError {
         error_type: ErrorType,
         message: String,
         provider: String,
-        source: Option<anyhow::Error>,
+        source: Option<eyre::Error>,
     ) -> Self {
         Self {
             error_type,
