@@ -28,7 +28,10 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
+          components: rustfmt, clippy, llvm-tools-preview
+      
+      - name: Install just
+        uses: extractions/setup-just@v2
       
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
@@ -36,16 +39,16 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.rust }}
       
       - name: Check formatting
-        run: cargo fmt -- --check
+        run: just fmt-check
         
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: just lint
         
       - name: Build
-        run: cargo build --verbose --all-features
+        run: just build
         
       - name: Run tests
-        run: cargo test --verbose --all-features
+        run: just test
         
       - name: Run doc tests
         run: cargo test --doc --all-features
@@ -67,6 +70,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
+      
+      - name: Install just
+        uses: extractions/setup-just@v2
       
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
@@ -90,20 +96,19 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       
+      - name: Install just
+        uses: extractions/setup-just@v2
+      
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
       
-      - name: Install cargo-audit
-        run: cargo install cargo-audit --locked
+      - name: Install audit tools
+        run: |
+          cargo install cargo-audit --locked
+          cargo install cargo-deny --locked
         
-      - name: Security audit
-        run: cargo audit
-      
-      - name: Install cargo-deny
-        run: cargo install cargo-deny --locked
-      
-      - name: Run cargo-deny
-        run: cargo deny check
+      - name: Run security audit
+        run: just audit
 
   benchmarks:
     name: Performance Benchmarks
@@ -115,11 +120,14 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       
+      - name: Install just
+        uses: extractions/setup-just@v2
+      
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
       
       - name: Run benchmarks
-        run: cargo bench --all-features
+        run: just bench
       
       - name: Store benchmark results
         uses: benchmark-action/github-action-benchmark@v1
@@ -138,6 +146,9 @@ jobs:
       
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install just
+        uses: extractions/setup-just@v2
       
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
@@ -174,6 +185,9 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       
+      - name: Install just
+        uses: extractions/setup-just@v2
+      
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
       
@@ -185,7 +199,7 @@ jobs:
           done
       
       - name: Run integration tests
-        run: cargo test --features caching integration -- --test-threads=1
+        run: just test-integration
         env:
           REDIS_URL: redis://localhost:6379
 
@@ -200,13 +214,16 @@ jobs:
         with:
           toolchain: "1.75" # From Cargo.toml rust-version
       
+      - name: Install just
+        uses: extractions/setup-just@v2
+      
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           key: msrv
       
       - name: Check compilation with MSRV
-        run: cargo check --all-features --all-targets
+        run: just check-msrv
 
   dependency-review:
     name: Dependency Review

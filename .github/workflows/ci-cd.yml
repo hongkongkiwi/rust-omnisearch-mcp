@@ -19,6 +19,9 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     
+    - name: Install just
+      uses: extractions/setup-just@v2
+    
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -38,13 +41,13 @@ jobs:
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     
     - name: Check formatting
-      run: cargo fmt -- --check
+      run: just fmt-check
     
     - name: Build
-      run: cargo build --verbose
+      run: just build
     
     - name: Run tests
-      run: cargo test --verbose
+      run: just test
 
   release:
     needs: build
@@ -56,6 +59,9 @@ jobs:
     
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
+    
+    - name: Install just
+      uses: extractions/setup-just@v2
     
     - name: Cache cargo registry
       uses: actions/cache@v4
@@ -70,7 +76,7 @@ jobs:
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
     
     - name: Build release
-      run: cargo build --release --verbose
+      run: just release
     
     - name: Upload release artifacts
       uses: actions/upload-artifact@v4
