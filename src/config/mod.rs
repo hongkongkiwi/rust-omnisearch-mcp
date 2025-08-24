@@ -374,7 +374,10 @@ pub fn validate_config() -> Result<()> {
     }
 
     // Validate cache configuration
-    if config.cache.enabled && matches!(config.cache.cache_type, CacheType::Redis) && config.cache.redis.url.is_empty() {
+    if config.cache.enabled
+        && matches!(config.cache.cache_type, CacheType::Redis)
+        && config.cache.redis.url.is_empty()
+    {
         return Err(eyre!("Redis URL is required when using Redis cache"));
     }
 
