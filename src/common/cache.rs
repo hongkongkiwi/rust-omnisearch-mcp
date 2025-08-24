@@ -73,6 +73,7 @@ impl CacheProvider for MemoryCache {
 #[cfg(feature = "caching")]
 pub struct RedisCache {
     client: redis::Client,
+    #[allow(dead_code)]
     ttl: Duration,
 }
 

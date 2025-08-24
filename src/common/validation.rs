@@ -9,7 +9,9 @@ use crate::common::types::BaseSearchParams;
 
 // Validation constants
 const MAX_QUERY_LENGTH: usize = 1000;
+#[allow(dead_code)]
 const MAX_RESULTS_LIMIT: usize = 100;
+#[allow(dead_code)]
 const MIN_RESULTS_LIMIT: usize = 1;
 const MAX_DOMAIN_COUNT: usize = 50;
 const MAX_DOMAIN_LENGTH: usize = 253; // DNS limit
@@ -24,7 +26,7 @@ lazy_static::lazy_static! {
     ).unwrap();
 
     static ref MALICIOUS_PATTERNS: Vec<Regex> = vec![
-        Regex::new(r"(?i)<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>").unwrap(), // XSS
+        Regex::new(r"(?i)<script\b[^>]*>.*?</script>").unwrap(), // XSS
         Regex::new(r"(?i)javascript:").unwrap(), // JavaScript URLs
         Regex::new(r"(?i)data:.*base64").unwrap(), // Base64 data URLs
         Regex::new(r"(?i)vbscript:").unwrap(), // VBScript
@@ -233,7 +235,7 @@ fn is_suspicious_domain(domain: &str) -> bool {
 
     // Check for suspicious TLDs (this could be configurable)
     let suspicious_tlds = ["tk", "ml", "ga", "cf", "xyz"];
-    if let Some(tld) = domain_lower.split('.').last() {
+    if let Some(tld) = domain_lower.split('.').next_back() {
         if suspicious_tlds.contains(&tld) {
             return true;
         }
@@ -248,7 +250,7 @@ fn is_suspicious_domain(domain: &str) -> bool {
     }
 
     // Check for homograph attacks (basic check)
-    if domain_lower.chars().any(|c| !c.is_ascii()) {
+    if !domain_lower.is_ascii() {
         return true;
     }
 

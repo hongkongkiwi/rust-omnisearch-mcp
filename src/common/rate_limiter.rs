@@ -18,6 +18,12 @@ pub struct RateLimiterManager {
     enabled: bool,
 }
 
+impl Default for RateLimiterManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RateLimiterManager {
     pub fn new() -> Self {
         let enabled = CONFIG.rate_limiting.enabled;

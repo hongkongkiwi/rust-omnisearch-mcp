@@ -198,7 +198,7 @@ jobs:
       - name: Install MSRV Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: "1.70" # From Cargo.toml rust-version
+          toolchain: "1.75" # From Cargo.toml rust-version
       
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2

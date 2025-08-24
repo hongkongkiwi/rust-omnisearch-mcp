@@ -63,6 +63,12 @@ pub struct HealthChecker {
     start_time: Instant,
 }
 
+impl Default for HealthChecker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HealthChecker {
     pub fn new() -> Self {
         Self {

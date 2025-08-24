@@ -231,6 +231,12 @@ pub struct CircuitBreakerManager {
     half_open_max_calls: u32,
 }
 
+impl Default for CircuitBreakerManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CircuitBreakerManager {
     pub fn new() -> Self {
         let config = &CONFIG.circuit_breaker;
@@ -244,6 +250,7 @@ impl CircuitBreakerManager {
         }
     }
 
+    #[allow(dead_code)]
     async fn get_or_create_breaker(&self, provider: &str) -> Arc<RwLock<CircuitBreaker>> {
         let mut breakers = self.breakers.write().await;
 

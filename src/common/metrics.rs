@@ -6,7 +6,7 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::RwLock;
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 
 use crate::config::CONFIG;
 
@@ -34,6 +34,12 @@ pub struct ProviderStats {
 pub struct MetricsCollector {
     enabled: bool,
     stats: Arc<RwLock<HashMap<String, ProviderStats>>>,
+}
+
+impl Default for MetricsCollector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MetricsCollector {
