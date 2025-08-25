@@ -45,8 +45,8 @@ tower = { version = "0.4", features = ["limit", "buffer"] }
 governor = "0.6"
 
 # Metrics and observability
-metrics = "0.22"
-metrics-exporter-prometheus = { version = "0.13", optional = true }
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.17", optional = true }
 
 # Circuit breaker
 failsafe = "1.2"
