@@ -9,42 +9,42 @@ use omnisearch_mcp::{
 
 #[test]
 fn test_google_provider_creation() {
-    let provider = GoogleCustomSearchProvider::new();
+    let _provider = GoogleCustomSearchProvider::new();
     assert_eq!(provider.name(), "google_custom_search");
     assert!(!provider.description().is_empty());
 }
 
 #[test]
 fn test_reddit_provider_creation() {
-    let provider = RedditSearchProvider::new();
+    let _provider = RedditSearchProvider::new();
     assert_eq!(provider.name(), "reddit");
     assert!(!provider.description().is_empty());
 }
 
 #[test]
 fn test_duckduckgo_provider_creation() {
-    let provider = DuckDuckGoSearchProvider::new();
+    let _provider = DuckDuckGoSearchProvider::new();
     assert_eq!(provider.name(), "duckduckgo");
     assert!(!provider.description().is_empty());
 }
 
 #[test]
 fn test_baidu_provider_creation() {
-    let provider = BaiduSearchProvider::new();
+    let _provider = BaiduSearchProvider::new();
     assert_eq!(provider.name(), "baidu");
     assert!(!provider.description().is_empty());
 }
 
 #[test]
 fn test_brightdata_provider_creation() {
-    let provider = BrightDataSearchProvider::new();
+    let _provider = BrightDataSearchProvider::new();
     assert_eq!(provider.name(), "brightdata");
     assert!(!provider.description().is_empty());
 }
 
 #[test]
 fn test_exa_provider_creation() {
-    let provider = ExaSearchProvider::new();
+    let _provider = ExaSearchProvider::new();
     assert_eq!(provider.name(), "exa");
     assert!(!provider.description().is_empty());
 }

@@ -11,8 +11,9 @@ fn test_provider_error_creation() {
 
     // Use match instead of assert_eq for ErrorType
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => { // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected ApiError"),
     }
     assert_eq!(error.message, "Test API error");
     assert_eq!(error.provider, "test_provider");
@@ -30,8 +31,9 @@ fn test_provider_error_with_source() {
     );
 
     match error.error_type {
-        ErrorType::RateLimit => assert!(true),
-        _ => assert!(false, "Expected RateLimit"),
+        ErrorType::RateLimit => { // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected RateLimit"),
     }
     assert_eq!(error.message, "Rate limit exceeded");
     assert_eq!(error.provider, "test_provider");

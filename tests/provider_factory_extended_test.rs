@@ -40,7 +40,7 @@ fn test_provider_factory_with_single_provider() {
         }
     }
 
-    let providers: Vec<Box<dyn SearchProvider>> = vec![Box::new(TestProvider {})];
+    let _providers: Vec<Box<dyn SearchProvider>> = vec![Box::new(TestProvider {})];
 
     let names = ProviderFactory::get_provider_names(&providers);
 
@@ -96,7 +96,7 @@ fn test_provider_factory_with_duplicate_names() {
         }
     }
 
-    let providers: Vec<Box<dyn SearchProvider>> =
+    let _providers: Vec<Box<dyn SearchProvider>> =
         vec![Box::new(TestProvider1 {}), Box::new(TestProvider2 {})];
 
     let names = ProviderFactory::get_provider_names(&providers);

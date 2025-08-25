@@ -42,10 +42,6 @@ async fn test_tavily_provider_comprehensive_search() {
                             || e.message.contains("Invalid API key")
                     );
                 }
-                _ => {
-                    // Other error types are acceptable
-                    // Test passes if compilation succeeds
-                }
             }
         }
     }

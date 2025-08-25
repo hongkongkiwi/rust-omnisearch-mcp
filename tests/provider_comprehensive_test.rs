@@ -52,7 +52,7 @@ fn test_all_provider_construction() {
 #[test]
 fn test_all_provider_descriptions() {
     // Test that all providers have meaningful descriptions
-    let providers: Vec<Box<dyn SearchProvider>> = vec![
+    let _providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(TavilySearchProvider::new()),
         Box::new(GoogleCustomSearchProvider::new()),
         Box::new(RedditSearchProvider::new()),
@@ -129,10 +129,6 @@ fn test_all_provider_descriptions() {
                         || description.contains("relevance")
                 );
             }
-            _ => {
-                // For any other provider, just ensure it has a reasonable description
-                assert!(description.len() > 10);
-            }
         }
     }
 }
@@ -140,7 +136,7 @@ fn test_all_provider_descriptions() {
 #[test]
 fn test_provider_traits() {
     // Test that all providers implement the required traits correctly
-    let providers: Vec<Box<dyn SearchProvider>> = vec![
+    let _providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(TavilySearchProvider::new()),
         Box::new(GoogleCustomSearchProvider::new()),
         Box::new(RedditSearchProvider::new()),

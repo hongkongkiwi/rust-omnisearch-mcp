@@ -42,10 +42,6 @@ async fn test_reddit_provider_comprehensive_search() {
                             || e.message.contains("unauthorized")
                     );
                 }
-                _ => {
-                    // Other error types are acceptable
-                    // Test passes if compilation succeeds
-                }
             }
         }
     }

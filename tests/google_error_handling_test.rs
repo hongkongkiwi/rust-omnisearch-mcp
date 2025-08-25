@@ -7,7 +7,7 @@ use omnisearch_mcp::{
 
 #[tokio::test]
 async fn test_google_provider_missing_credentials_error() {
-    let provider = GoogleCustomSearchProvider::new();
+    let _provider = GoogleCustomSearchProvider::new();
 
     // Test with missing credentials - should return an error
     let params = BaseSearchParams {
@@ -44,7 +44,7 @@ async fn test_google_provider_missing_credentials_error() {
 
 #[tokio::test]
 async fn test_google_provider_invalid_parameters() {
-    let provider = GoogleCustomSearchProvider::new();
+    let _provider = GoogleCustomSearchProvider::new();
 
     // Test with invalid parameters
     let params = BaseSearchParams {
@@ -69,7 +69,7 @@ async fn test_google_provider_invalid_parameters() {
 
 #[tokio::test]
 async fn test_google_provider_extreme_limits() {
-    let provider = GoogleCustomSearchProvider::new();
+    let _provider = GoogleCustomSearchProvider::new();
 
     // Test with extreme limits
     let params = BaseSearchParams {

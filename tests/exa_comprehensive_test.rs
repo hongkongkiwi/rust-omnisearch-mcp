@@ -62,10 +62,6 @@ async fn test_exa_provider_comprehensive_search() {
                             || e.message.contains("Provider internal error")
                     );
                 }
-                _ => {
-                    // Other error types are acceptable
-                    // Test passes if compilation succeeds
-                }
             }
         }
     }

@@ -59,10 +59,6 @@ async fn test_duckduckgo_provider_comprehensive_search() {
                             || e.message.contains("DuckDuckGo API internal error")
                     );
                 }
-                _ => {
-                    // Other error types are acceptable
-                    // Test passes if compilation succeeds
-                }
             }
         }
     }

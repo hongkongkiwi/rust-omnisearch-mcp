@@ -4,7 +4,7 @@ use omnisearch_mcp::server::tools::{AvailableProviders, ToolRegistry, AVAILABLE_
 
 #[test]
 fn test_available_providers_creation() {
-    let providers = AvailableProviders::new();
+    let _providers = AvailableProviders::new();
 
     // All categories should start empty
     assert_eq!(providers.search.read().unwrap().len(), 0);
@@ -71,12 +71,12 @@ fn test_available_providers_concurrent_access() {
     use std::sync::Arc;
     use std::thread;
 
-    let providers = Arc::new(AvailableProviders::new());
+    let _providers = Arc::new(AvailableProviders::new());
     let mut handles = vec![];
 
     // Test concurrent read/write access
     for i in 0..3 {
-        let providers_clone = Arc::clone(&providers);
+        let _providers_clone = Arc::clone(&providers);
         let handle = thread::spawn(move || {
             // Write to different categories
             match i {
@@ -121,7 +121,7 @@ fn test_available_providers_concurrent_access() {
 
 #[test]
 fn test_provider_names_deduplication() {
-    let providers = AvailableProviders::new();
+    let _providers = AvailableProviders::new();
 
     // Add duplicate names to search providers
     {
@@ -139,7 +139,7 @@ fn test_provider_names_deduplication() {
 
 #[test]
 fn test_available_providers_categories_independent() {
-    let providers = AvailableProviders::new();
+    let _providers = AvailableProviders::new();
 
     // Add providers to different categories
     {

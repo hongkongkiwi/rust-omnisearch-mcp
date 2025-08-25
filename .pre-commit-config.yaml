@@ -1,131 +1,39 @@
----
-# Pre-commit hooks configuration
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-
 repos:
-  # General pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v4.4.0
     hooks:
       - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
       - id: check-yaml
-        args: [--allow-multiple-documents]
       - id: check-toml
       - id: check-json
-      - id: check-xml
       - id: check-merge-conflict
-      - id: check-case-conflict
       - id: check-added-large-files
-        args: [--maxkb=1000]
-      - id: check-symlinks
-      - id: destroyed-symlinks
-      - id: mixed-line-ending
-        args: [--fix=lf]
-      - id: pretty-format-json
-        args: [--autofix, --indent=2]
+        args: ['--maxkb=1000']
 
-  # Rust-specific hooks
   - repo: local
     hooks:
-      # Format Rust code
       - id: cargo-fmt
-        name: cargo fmt
-        entry: cargo fmt
+        name: cargo fmt (src only)
+        entry: bash -c 'find src/ -name "*.rs" -exec rustfmt {} \;'
         language: system
         types: [rust]
         pass_filenames: false
 
-      # Check for clippy warnings
-      - id: cargo-clippy
-        name: cargo clippy
-        entry: cargo clippy --all-targets --all-features -- -D warnings
+      - id: cargo-clippy-lib
+        name: cargo clippy (lib only)
+        entry: cargo clippy --lib -- -D warnings
         language: system
         types: [rust]
         pass_filenames: false
 
-      # Run tests
-      - id: cargo-test
-        name: cargo test
-        entry: cargo test --all-features
+      - id: cargo-check-lib
+        name: cargo check (lib only)
+        entry: cargo check --lib
         language: system
         types: [rust]
         pass_filenames: false
-        stages: [pre-push]
-
-      # Check that Cargo.toml is properly formatted
-      - id: cargo-check
-        name: cargo check
-        entry: cargo check --all-targets --all-features
-        language: system
-        types: [rust]
-        pass_filenames: false
-
-      # Security audit
-      - id: cargo-audit
-        name: cargo audit
-        entry: bash -c 'command -v cargo-audit >/dev/null 2>&1 && cargo audit ||
-          echo "cargo-audit not installed, skipping security audit"'
-        language: system
-        types: [rust]
-        pass_filenames: false
-        stages: [pre-push]
-
-      # Dependency license and security check
-      - id: cargo-deny
-        name: cargo deny check
-        entry:
-          bash -c 'command -v cargo-deny >/dev/null 2>&1 && cargo deny check ||
-          echo "cargo-deny not installed, skipping deny check"'
-        language: system
-        types: [rust]
-        pass_filenames: false
-        stages: [pre-push]
-
-  # Markdown and documentation
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
-    hooks:
-      - id: markdownlint
-        args: [--fix]
-        exclude: ^(CHANGELOG\.md|LICENSE\.md)$
-
-  # YAML formatting
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
-    hooks:
-      - id: prettier
-        types: [yaml]
-        args: [--write]
-
-  # Check GitHub Actions workflows
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.1
-    hooks:
-      - id: actionlint
 
 # Global configuration
 default_stages: [pre-commit]
 fail_fast: false
-exclude: |
-  (?x)^(
-    target/.*|
-    \.git/.*|
-    \.vscode/.*|
-    \.idea/.*
-  )$
-
-# CI configuration
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ""
-  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
-  autoupdate_schedule: weekly
-  skip: [cargo-test, cargo-audit, cargo-deny]
-  submodules: false

@@ -43,10 +43,6 @@ async fn test_google_provider_comprehensive_search() {
                             || e.message.contains("Invalid API key")
                     );
                 }
-                _ => {
-                    // Other error types are acceptable too
-                    // Test passes if compilation succeeds
-                }
             }
         }
     }

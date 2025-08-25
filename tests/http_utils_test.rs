@@ -21,7 +21,7 @@ fn test_handle_http_error_400() {
     );
 
     match error.error_type {
-        ErrorType::InvalidInput => assert!(true),
+        ErrorType::InvalidInput => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected InvalidInput"),
     }
     assert_eq!(error.provider, "test_provider");
@@ -40,7 +40,7 @@ fn test_handle_http_error_401() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
+        ErrorType::ApiError => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected ApiError"),
     }
     assert!(error.message.contains("Invalid API key"));
@@ -60,7 +60,7 @@ fn test_handle_http_error_403() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
+        ErrorType::ApiError => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected ApiError"),
     }
     assert!(error.message.contains("API key does not have access"));
@@ -80,7 +80,7 @@ fn test_handle_http_error_429() {
     );
 
     match error.error_type {
-        ErrorType::RateLimit => assert!(true),
+        ErrorType::RateLimit => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected RateLimit"),
     }
     assert!(error.message.contains("Rate limit exceeded"));
@@ -100,7 +100,7 @@ fn test_handle_http_error_500() {
     );
 
     match error.error_type {
-        ErrorType::ProviderError => assert!(true),
+        ErrorType::ProviderError => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected ProviderError"),
     }
     assert!(error.message.contains("Provider internal error"));
@@ -120,7 +120,7 @@ fn test_handle_http_error_unexpected() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
+        ErrorType::ApiError => // Test passes if compilation succeeds,
         _ => assert!(false, "Expected ApiError"),
     }
     assert!(error.message.contains("Unexpected error"));

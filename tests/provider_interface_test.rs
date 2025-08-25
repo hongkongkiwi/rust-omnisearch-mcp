@@ -11,7 +11,7 @@ use omnisearch_mcp::{
 #[test]
 fn test_all_providers_implement_search_provider_trait() {
     // This test ensures all providers correctly implement the SearchProvider trait
-    let providers: Vec<Box<dyn SearchProvider>> = vec![
+    let _providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(TavilySearchProvider::new()),
         Box::new(GoogleCustomSearchProvider::new()),
         Box::new(RedditSearchProvider::new()),
@@ -45,7 +45,7 @@ fn test_all_providers_implement_search_provider_trait() {
 
 #[test]
 fn test_provider_names_are_unique() {
-    let provider_names = [
+    let _provider_names = [
         TavilySearchProvider::new().name(),
         GoogleCustomSearchProvider::new().name(),
         RedditSearchProvider::new().name(),
@@ -80,7 +80,7 @@ fn test_expected_provider_names() {
 
 #[test]
 fn test_provider_descriptions_contain_key_info() {
-    let providers: Vec<Box<dyn SearchProvider>> = vec![
+    let _providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(TavilySearchProvider::new()),
         Box::new(GoogleCustomSearchProvider::new()),
         Box::new(RedditSearchProvider::new()),

@@ -6,7 +6,7 @@ fn test_api_key_provider_valid_key() {
     struct TestProvider;
     impl ApiKeyProvider for TestProvider {}
 
-    let provider = TestProvider;
+    let _provider = TestProvider;
     let api_key = Some("test_key".to_string());
 
     let result = provider.validate_api_key(api_key.as_ref(), "test_provider");
@@ -18,7 +18,7 @@ fn test_api_key_provider_missing_key() {
     struct TestProvider;
     impl ApiKeyProvider for TestProvider {}
 
-    let provider = TestProvider;
+    let _provider = TestProvider;
     let api_key: Option<String> = None;
 
     let result = provider.validate_api_key(api_key.as_ref(), "test_provider");
@@ -26,8 +26,10 @@ fn test_api_key_provider_missing_key() {
 
     let error = result.unwrap_err();
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {
+            // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("Missing API key"));
     assert_eq!(error.provider, "test_provider");
@@ -38,7 +40,7 @@ fn test_multi_credential_provider_all_valid() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let provider = TestProvider;
+    let _provider = TestProvider;
     let cred1 = "cred1".to_string();
     let cred2 = "cred2".to_string();
     let cred3 = "cred3".to_string();
@@ -54,7 +56,7 @@ fn test_multi_credential_provider_missing_first() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let provider = TestProvider;
+    let _provider = TestProvider;
     let cred2 = "cred2".to_string();
     let cred3 = "cred3".to_string();
     let credentials = vec![None, Some(&cred2), Some(&cred3)];
@@ -65,8 +67,10 @@ fn test_multi_credential_provider_missing_first() {
 
     let error = result.unwrap_err();
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {
+            // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("Missing cred1"));
     assert_eq!(error.provider, "test_provider");
@@ -77,7 +81,7 @@ fn test_multi_credential_provider_missing_middle() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let provider = TestProvider;
+    let _provider = TestProvider;
     let cred1 = "cred1".to_string();
     let cred3 = "cred3".to_string();
     let credentials = vec![Some(&cred1), None, Some(&cred3)];
@@ -88,8 +92,10 @@ fn test_multi_credential_provider_missing_middle() {
 
     let error = result.unwrap_err();
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {
+            // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("Missing cred2"));
     assert_eq!(error.provider, "test_provider");
@@ -104,8 +110,10 @@ fn test_provider_utils_provider_error() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => assert!(true),
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {
+            // Test passes if compilation succeeds
+        }
+        _ => panic!("Expected ApiError"),
     }
     assert_eq!(error.message, "Test error message");
     assert_eq!(error.provider, "test_provider");
