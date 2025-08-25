@@ -178,16 +178,6 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       
@@ -200,17 +190,8 @@ jobs:
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
       
-      - name: Wait for Redis
-        run: |
-          until redis-cli -h localhost -p 6379 ping; do
-            echo "Waiting for Redis..."
-            sleep 1
-          done
-      
       - name: Run integration tests
         run: just test-integration
-        env:
-          REDIS_URL: redis://localhost:6379
 
   msrv:
     name: Minimum Supported Rust Version

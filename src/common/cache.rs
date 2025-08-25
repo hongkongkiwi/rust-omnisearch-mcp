@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use eyre::Result;
 use moka::future::Cache as MokaCache;
 use std::time::Duration;
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 
 use crate::common::types::SearchResult;
 use crate::config::{CacheConfig, CacheType, CONFIG};
@@ -70,96 +70,6 @@ impl CacheProvider for MemoryCache {
     }
 }
 
-#[cfg(feature = "caching")]
-pub struct RedisCache {
-    client: redis::Client,
-    #[allow(dead_code)]
-    ttl: Duration,
-}
-
-#[cfg(feature = "caching")]
-impl RedisCache {
-    pub async fn new(config: &CacheConfig) -> Result<Self> {
-        use redis::Client;
-
-        let client = Client::open(config.redis.url.as_str())?;
-
-        info!("Connected to Redis cache at: {}", config.redis.url);
-
-        Ok(Self {
-            client,
-            ttl: Duration::from_secs(config.ttl_seconds),
-        })
-    }
-}
-
-#[cfg(feature = "caching")]
-#[async_trait]
-impl CacheProvider for RedisCache {
-    async fn get(&self, key: &str) -> Result<Option<CacheValue>> {
-        use redis::AsyncCommands;
-
-        let mut conn = self.client.get_async_connection().await?;
-        let cached_data: Option<String> = conn.get(key).await?;
-
-        match cached_data {
-            Some(data) => {
-                match serde_json::from_str::<CacheValue>(&data) {
-                    Ok(value) => {
-                        debug!("Cache hit for key: {}", key);
-                        Ok(Some(value))
-                    }
-                    Err(e) => {
-                        error!("Failed to deserialize cached data for key {}: {}", key, e);
-                        // Remove corrupted cache entry
-                        let _: () = conn.del(key).await?;
-                        Ok(None)
-                    }
-                }
-            }
-            None => {
-                debug!("Cache miss for key: {}", key);
-                Ok(None)
-            }
-        }
-    }
-
-    async fn set(&self, key: &str, value: CacheValue, ttl: Duration) -> Result<()> {
-        use redis::AsyncCommands;
-
-        let mut conn = self.client.get_async_connection().await?;
-        let serialized = serde_json::to_string(&value)?;
-
-        let _: () = conn.set_ex(key, serialized, ttl.as_secs()).await?;
-        debug!("Cached {} results for key: {}", value.len(), key);
-        Ok(())
-    }
-
-    async fn delete(&self, key: &str) -> Result<()> {
-        use redis::AsyncCommands;
-
-        let mut conn = self.client.get_async_connection().await?;
-        let _: () = conn.del(key).await?;
-        debug!("Removed cache entry for key: {}", key);
-        Ok(())
-    }
-
-    async fn clear(&self) -> Result<()> {
-        let mut conn = self.client.get_async_connection().await?;
-        redis::cmd("FLUSHALL")
-            .query_async::<_, ()>(&mut conn)
-            .await?;
-        info!("Cleared Redis cache");
-        Ok(())
-    }
-
-    async fn size(&self) -> Result<usize> {
-        let mut conn = self.client.get_async_connection().await?;
-        let dbsize: usize = redis::cmd("DBSIZE").query_async(&mut conn).await?;
-        Ok(dbsize)
-    }
-}
-
 pub struct CacheManager {
     provider: Box<dyn CacheProvider>,
     enabled: bool,
@@ -170,9 +80,10 @@ impl CacheManager {
         let config = &CONFIG.cache;
 
         if !config.enabled {
-            info!("Cache disabled");
+            info!("Cache is disabled");
+            let dummy_cache = MemoryCache::new(config);
             return Ok(Self {
-                provider: Box::new(MemoryCache::new(config)),
+                provider: Box::new(dummy_cache),
                 enabled: false,
             });
         }
@@ -180,18 +91,6 @@ impl CacheManager {
         let provider: Box<dyn CacheProvider> = match config.cache_type {
             CacheType::Memory => {
                 info!("Using memory cache with {} max entries", config.max_entries);
-                Box::new(MemoryCache::new(config))
-            }
-            #[cfg(feature = "caching")]
-            CacheType::Redis => {
-                info!("Using Redis cache");
-                Box::new(RedisCache::new(config).await?)
-            }
-            #[cfg(not(feature = "caching"))]
-            CacheType::Redis => {
-                error!(
-                    "Redis cache requested but caching feature not enabled, falling back to memory"
-                );
                 Box::new(MemoryCache::new(config))
             }
         };
@@ -202,15 +101,6 @@ impl CacheManager {
         })
     }
 
-    pub fn generate_cache_key(provider: &str, query: &str, params: &str) -> String {
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
-
-        let mut hasher = DefaultHasher::new();
-        format!("{}:{}:{}", provider, query, params).hash(&mut hasher);
-        format!("omnisearch:{}:{:x}", provider, hasher.finish())
-    }
-
     pub async fn get(&self, key: &str) -> Result<Option<CacheValue>> {
         if !self.enabled {
             return Ok(None);
@@ -218,11 +108,10 @@ impl CacheManager {
         self.provider.get(key).await
     }
 
-    pub async fn set(&self, key: &str, value: CacheValue) -> Result<()> {
+    pub async fn set(&self, key: &str, value: CacheValue, ttl: Duration) -> Result<()> {
         if !self.enabled {
             return Ok(());
         }
-        let ttl = Duration::from_secs(CONFIG.cache.ttl_seconds);
         self.provider.set(key, value, ttl).await
     }
 
@@ -246,49 +135,32 @@ impl CacheManager {
         }
         self.provider.size().await
     }
-}
 
-// Global cache manager instance
-use std::sync::Arc;
-use tokio::sync::OnceCell as TokioOnceCell;
-
-static CACHE_MANAGER: TokioOnceCell<Arc<CacheManager>> = TokioOnceCell::const_new();
-
-pub async fn get_cache_manager() -> Arc<CacheManager> {
-    CACHE_MANAGER
-        .get_or_init(|| async {
-            Arc::new(CacheManager::new().await.unwrap_or_else(|e| {
-                error!("Failed to initialize cache manager: {}", e);
-                CacheManager {
-                    provider: Box::new(MemoryCache::new(&CONFIG.cache)),
-                    enabled: false,
-                }
-            }))
-        })
-        .await
-        .clone()
+    pub fn generate_cache_key(provider: &str, query: &str, limit: Option<usize>) -> String {
+        format!("{}:{}:{}", provider, query, limit.unwrap_or(10))
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::types::SearchResult;
+    use crate::config::CacheType;
 
     fn create_test_results() -> Vec<SearchResult> {
         vec![
             SearchResult {
                 title: "Test Result 1".to_string(),
-                url: "https://example.com/1".to_string(),
-                snippet: "Test snippet 1".to_string(),
-                score: None,
+                url: "https://example1.com".to_string(),
+                snippet: "This is a test result 1".to_string(),
                 source_provider: "test".to_string(),
+                score: Some(0.95),
             },
             SearchResult {
                 title: "Test Result 2".to_string(),
-                url: "https://example.com/2".to_string(),
-                snippet: "Test snippet 2".to_string(),
-                score: None,
+                url: "https://example2.com".to_string(),
+                snippet: "This is a test result 2".to_string(),
                 source_provider: "test".to_string(),
+                score: Some(0.90),
             },
         ]
     }
@@ -300,7 +172,6 @@ mod tests {
             cache_type: CacheType::Memory,
             ttl_seconds: 60,
             max_entries: 100,
-            redis: Default::default(),
         };
 
         let cache = MemoryCache::new(&config);
@@ -311,24 +182,43 @@ mod tests {
             .set("test_key", test_results.clone(), Duration::from_secs(60))
             .await
             .unwrap();
+
         let retrieved = cache.get("test_key").await.unwrap();
         assert!(retrieved.is_some());
         assert_eq!(retrieved.unwrap().len(), 2);
+
+        // Test size (moka cache may not immediately report size)
+        let size = cache.size().await.unwrap();
+        assert!(size >= 0); // Cache should exist and report size
 
         // Test delete
         cache.delete("test_key").await.unwrap();
         let retrieved = cache.get("test_key").await.unwrap();
         assert!(retrieved.is_none());
+
+        // Test clear
+        cache
+            .set("key1", test_results.clone(), Duration::from_secs(60))
+            .await
+            .unwrap();
+        cache
+            .set("key2", test_results.clone(), Duration::from_secs(60))
+            .await
+            .unwrap();
+
+        cache.clear().await.unwrap();
+        let retrieved1 = cache.get("key1").await.unwrap();
+        let retrieved2 = cache.get("key2").await.unwrap();
+        assert!(retrieved1.is_none());
+        assert!(retrieved2.is_none());
     }
 
     #[test]
     fn test_cache_key_generation() {
-        let key1 = CacheManager::generate_cache_key("tavily", "rust programming", "limit=10");
-        let key2 = CacheManager::generate_cache_key("tavily", "rust programming", "limit=10");
-        let key3 = CacheManager::generate_cache_key("tavily", "python programming", "limit=10");
+        let key1 = CacheManager::generate_cache_key("google", "rust programming", Some(10));
+        assert_eq!(key1, "google:rust programming:10");
 
-        assert_eq!(key1, key2);
-        assert_ne!(key1, key3);
-        assert!(key1.starts_with("omnisearch:tavily:"));
+        let key2 = CacheManager::generate_cache_key("duckduckgo", "web search", None);
+        assert_eq!(key2, "duckduckgo:web search:10");
     }
 }

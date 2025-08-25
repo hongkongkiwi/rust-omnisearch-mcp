@@ -32,20 +32,12 @@ pub struct CacheConfig {
     pub cache_type: CacheType,
     pub ttl_seconds: u64,
     pub max_entries: usize,
-    pub redis: RedisConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CacheType {
     Memory,
-    Redis,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct RedisConfig {
-    pub url: String,
-    pub pool_size: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -142,10 +134,6 @@ impl Default for Config {
                 cache_type: CacheType::Memory,
                 ttl_seconds: 3600,
                 max_entries: 10000,
-                redis: RedisConfig {
-                    url: "redis://localhost:6379".to_string(),
-                    pool_size: 10,
-                },
             },
             rate_limiting: RateLimitingConfig {
                 enabled: true,
@@ -373,13 +361,7 @@ pub fn validate_config() -> Result<()> {
         return Err(eyre!("Max connections cannot be 0"));
     }
 
-    // Validate cache configuration
-    if config.cache.enabled
-        && matches!(config.cache.cache_type, CacheType::Redis)
-        && config.cache.redis.url.is_empty()
-    {
-        return Err(eyre!("Redis URL is required when using Redis cache"));
-    }
+    // Cache configuration is valid - only Memory cache is supported
 
     Ok(())
 }
