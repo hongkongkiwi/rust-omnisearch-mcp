@@ -116,6 +116,33 @@ docs: update installation instructions
 test: add integration tests for search functionality
 ```
 
+### CI vs Pre-commit Guidelines
+
+To maintain a clean and efficient workflow, we have a clear separation of concerns:
+
+**Pre-commit hooks handle ALL aesthetic/style checks:**
+- Code formatting (`cargo fmt`)
+- Linting (`cargo clippy` with `-D warnings`)
+- Documentation checks (`cargo doc` with warnings as errors)
+- Basic compilation checks (`cargo check`)
+- Security audits (`cargo audit`, `cargo deny` - on pre-push only)
+
+**CI focuses ONLY on functional verification:**
+- Unit, integration, and doc tests across multiple platforms
+- Build verification on different OS and Rust versions
+- Code coverage measurement
+- Performance benchmarks (PR only)
+- MSRV (Minimum Supported Rust Version) compatibility
+
+**Decision Rule:**
+- If it's about **how the code looks/style** → Pre-commit
+- If it's about **whether the code works functionally** → CI
+- If it's **expensive/slow** (like security audits) → Pre-push hooks
+- If it **needs multiple environments** (OS, Rust versions) → CI
+
+This ensures CI is fast and focused on actual functionality, while pre-commit
+catches style issues immediately during development.
+
 ### Pull Requests
 
 1. Fork the repository
