@@ -43,6 +43,9 @@ async fn test_google_provider_comprehensive_search() {
                             || e.message.contains("Invalid API key")
                     );
                 }
+                ErrorType::RateLimit | ErrorType::InvalidInput | ErrorType::ProviderError => {
+                    assert!(!e.message.is_empty());
+                }
             }
         }
     }
@@ -61,7 +64,7 @@ async fn test_google_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -80,7 +83,7 @@ async fn test_google_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle limits gracefully
             // Results length is always >= 0
         }
@@ -103,7 +106,7 @@ async fn test_google_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -145,7 +148,7 @@ async fn test_google_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -186,7 +189,7 @@ fn test_google_provider_construction() {
 
 #[test]
 fn test_google_provider_domain_filtering() {
-    let provider = GoogleCustomSearchProvider::new();
+    let _provider = GoogleCustomSearchProvider::new();
 
     // Test domain filtering functionality (implementation detail)
     // This ensures the domain filtering logic is tested

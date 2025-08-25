@@ -4,7 +4,7 @@ use omnisearch_mcp::server::tools::{AvailableProviders, ToolRegistry, AVAILABLE_
 
 #[test]
 fn test_available_providers_creation() {
-    let _providers = AvailableProviders::new();
+    let providers = AvailableProviders::new();
 
     // All categories should start empty
     assert_eq!(providers.search.read().unwrap().len(), 0);
@@ -15,7 +15,7 @@ fn test_available_providers_creation() {
 
 #[test]
 fn test_tool_registry_creation() {
-    let registry = ToolRegistry::new();
+    let _registry = ToolRegistry::new();
 
     // Registry should be created successfully - we can't access private fields
     // but we can test that creation doesn't panic
@@ -30,11 +30,12 @@ fn test_global_available_providers_access() {
     let processing_count = AVAILABLE_PROVIDERS.processing.read().unwrap().len();
     let enhancement_count = AVAILABLE_PROVIDERS.enhancement.read().unwrap().len();
 
-    // Counts should be non-negative (trivial but tests access)
-    assert!(search_count >= 0);
-    assert!(ai_count >= 0);
-    assert!(processing_count >= 0);
-    assert!(enhancement_count >= 0);
+    // Ensure counts can be accessed without panic
+    // Note: All counts are non-negative by type (usize)
+    let _ = search_count;
+    let _ = ai_count;
+    let _ = processing_count;
+    let _ = enhancement_count;
 }
 
 #[test]
@@ -71,12 +72,12 @@ fn test_available_providers_concurrent_access() {
     use std::sync::Arc;
     use std::thread;
 
-    let _providers = Arc::new(AvailableProviders::new());
+    let providers = Arc::new(AvailableProviders::new());
     let mut handles = vec![];
 
     // Test concurrent read/write access
     for i in 0..3 {
-        let _providers_clone = Arc::clone(&providers);
+        let providers_clone = Arc::clone(&providers);
         let handle = thread::spawn(move || {
             // Write to different categories
             match i {
@@ -121,7 +122,7 @@ fn test_available_providers_concurrent_access() {
 
 #[test]
 fn test_provider_names_deduplication() {
-    let _providers = AvailableProviders::new();
+    let providers = AvailableProviders::new();
 
     // Add duplicate names to search providers
     {
@@ -139,7 +140,7 @@ fn test_provider_names_deduplication() {
 
 #[test]
 fn test_available_providers_categories_independent() {
-    let _providers = AvailableProviders::new();
+    let providers = AvailableProviders::new();
 
     // Add providers to different categories
     {

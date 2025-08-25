@@ -42,6 +42,10 @@ async fn test_reddit_provider_comprehensive_search() {
                             || e.message.contains("unauthorized")
                     );
                 }
+                ErrorType::RateLimit | ErrorType::InvalidInput | ErrorType::ProviderError => {
+                    // These are also acceptable error types for credential issues
+                    assert!(!e.message.is_empty());
+                }
             }
         }
     }
@@ -60,7 +64,7 @@ async fn test_reddit_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -79,7 +83,7 @@ async fn test_reddit_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -101,7 +105,7 @@ async fn test_reddit_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle subreddit filtering
             // Results length is always >= 0
         }
@@ -143,7 +147,7 @@ async fn test_reddit_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -186,7 +190,7 @@ fn test_reddit_provider_construction() {
 
 #[test]
 fn test_reddit_provider_oauth2_authentication() {
-    let provider = RedditSearchProvider::new();
+    let _provider = RedditSearchProvider::new();
 
     // Test OAuth2 authentication flow (implementation detail)
     // This ensures the OAuth2 logic is tested
@@ -195,7 +199,7 @@ fn test_reddit_provider_oauth2_authentication() {
 
 #[test]
 fn test_reddit_provider_rate_limiting() {
-    let provider = RedditSearchProvider::new();
+    let _provider = RedditSearchProvider::new();
 
     // Test rate limiting handling (implementation detail)
     // This ensures the rate limiting logic is tested

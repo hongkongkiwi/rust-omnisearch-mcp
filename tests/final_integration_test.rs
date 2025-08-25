@@ -12,7 +12,7 @@ use omnisearch_mcp::{
 #[test]
 fn test_complete_application_initialization() {
     // Test that the entire application can be initialized without errors
-    let _validation_result = validate_config();
+    let validation_result = validate_config();
     assert!(validation_result.is_ok() || validation_result.is_err());
 
     // Initialize all providers
@@ -23,11 +23,11 @@ fn test_complete_application_initialization() {
 #[test]
 fn test_provider_factory_integration() {
     // Test that the provider factory works correctly
-    let _providers = ProviderFactory::create_search_providers();
+    let providers = ProviderFactory::create_search_providers();
     // Providers length is always >= 0, could be 0 if no API keys are configured
 
     // Test that we can get provider names
-    let _provider_names = ProviderFactory::get_provider_names(&providers);
+    let provider_names = ProviderFactory::get_provider_names(&providers);
     assert_eq!(provider_names.len(), providers.len());
 
     // Test that all providers have unique names
@@ -38,7 +38,7 @@ fn test_provider_factory_integration() {
 #[tokio::test]
 async fn test_all_providers_can_be_constructed() {
     // Test that all providers can be constructed without panicking
-    let _providers = ProviderFactory::create_search_providers();
+    let providers = ProviderFactory::create_search_providers();
 
     // Test that all providers have the required methods
     for provider in providers {
@@ -64,7 +64,7 @@ async fn test_all_providers_can_be_constructed() {
 #[test]
 fn test_provider_metadata_consistency() {
     // Test that all providers have consistent metadata
-    let _providers = ProviderFactory::create_search_providers();
+    let providers = ProviderFactory::create_search_providers();
 
     for provider in providers {
         let name = provider.name();
@@ -144,7 +144,7 @@ fn test_provider_metadata_consistency() {
 #[tokio::test]
 async fn test_provider_search_interface_compliance() {
     // Test that all providers comply with the SearchProvider interface
-    let _providers = ProviderFactory::create_search_providers();
+    let providers = ProviderFactory::create_search_providers();
 
     for provider in providers {
         let name = provider.name();

@@ -32,7 +32,7 @@ async fn test_all_providers_handle_missing_credentials() {
     }
 
     // Test each provider
-    let _providers: Vec<Box<dyn SearchProvider>> = vec![
+    let providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(TavilySearchProvider::new()),
         Box::new(GoogleCustomSearchProvider::new()),
         Box::new(RedditSearchProvider::new()),
@@ -76,7 +76,7 @@ async fn test_all_providers_handle_missing_credentials() {
 
 #[tokio::test]
 async fn test_empty_query_handling() {
-    let _providers: Vec<Box<dyn SearchProvider>> = vec![
+    let providers: Vec<Box<dyn SearchProvider>> = vec![
         Box::new(DuckDuckGoSearchProvider::new()),
         // Only test with providers that don't require API keys
     ];
@@ -92,7 +92,7 @@ async fn test_empty_query_handling() {
         let result = provider.search(params.clone()).await;
         // Should either handle gracefully or return some error
         match result {
-            Ok(results) => {
+            Ok(_results) => {
                 // Empty results are acceptable for empty query
                 // Some providers might return results, which is also fine
             }
@@ -303,7 +303,7 @@ async fn test_concurrent_error_handling() {
     futures.push(provider.search(params3));
 
     // Execute all concurrently
-    let _results = join_all(futures).await;
+    let results = join_all(futures).await;
 
     // All should complete without panicking
     assert_eq!(results.len(), 3);

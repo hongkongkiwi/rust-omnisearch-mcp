@@ -6,7 +6,7 @@ fn test_api_key_provider_valid_key() {
     struct TestProvider;
     impl ApiKeyProvider for TestProvider {}
 
-    let _provider = TestProvider;
+    let provider = TestProvider;
     let api_key = Some("test_key".to_string());
 
     let result = provider.validate_api_key(api_key.as_ref(), "test_provider");
@@ -18,7 +18,7 @@ fn test_api_key_provider_missing_key() {
     struct TestProvider;
     impl ApiKeyProvider for TestProvider {}
 
-    let _provider = TestProvider;
+    let provider = TestProvider;
     let api_key: Option<String> = None;
 
     let result = provider.validate_api_key(api_key.as_ref(), "test_provider");
@@ -40,7 +40,7 @@ fn test_multi_credential_provider_all_valid() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let _provider = TestProvider;
+    let provider = TestProvider;
     let cred1 = "cred1".to_string();
     let cred2 = "cred2".to_string();
     let cred3 = "cred3".to_string();
@@ -56,7 +56,7 @@ fn test_multi_credential_provider_missing_first() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let _provider = TestProvider;
+    let provider = TestProvider;
     let cred2 = "cred2".to_string();
     let cred3 = "cred3".to_string();
     let credentials = vec![None, Some(&cred2), Some(&cred3)];
@@ -81,7 +81,7 @@ fn test_multi_credential_provider_missing_middle() {
     struct TestProvider;
     impl MultiCredentialProvider for TestProvider {}
 
-    let _provider = TestProvider;
+    let provider = TestProvider;
     let cred1 = "cred1".to_string();
     let cred3 = "cred3".to_string();
     let credentials = vec![Some(&cred1), None, Some(&cred3)];

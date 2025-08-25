@@ -77,7 +77,7 @@ async fn test_duckduckgo_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -96,7 +96,7 @@ async fn test_duckduckgo_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -125,7 +125,7 @@ async fn test_duckduckgo_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -167,7 +167,7 @@ async fn test_duckduckgo_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -208,7 +208,7 @@ fn test_duckduckgo_provider_construction() {
 
 #[test]
 fn test_duckduckgo_provider_privacy_features() {
-    let provider = DuckDuckGoSearchProvider::new();
+    let _provider = DuckDuckGoSearchProvider::new();
 
     // Test privacy-focused features (implementation detail)
     // This ensures the privacy logic is tested
@@ -217,7 +217,7 @@ fn test_duckduckgo_provider_privacy_features() {
 
 #[test]
 fn test_duckduckgo_provider_no_api_key_required() {
-    let provider = DuckDuckGoSearchProvider::new();
+    let _provider = DuckDuckGoSearchProvider::new();
 
     // Test that DuckDuckGo doesn't require API keys
     // This is a key feature of the provider

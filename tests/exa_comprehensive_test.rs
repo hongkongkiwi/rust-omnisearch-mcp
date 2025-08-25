@@ -80,7 +80,7 @@ async fn test_exa_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -99,7 +99,7 @@ async fn test_exa_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -129,7 +129,7 @@ async fn test_exa_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -171,7 +171,7 @@ async fn test_exa_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -213,7 +213,7 @@ fn test_exa_provider_construction() {
 
 #[test]
 fn test_exa_provider_score_inclusion() {
-    let provider = ExaSearchProvider::new();
+    let _provider = ExaSearchProvider::new();
 
     // Test that Exa provider includes scores (implementation detail)
     // This ensures the score inclusion logic is tested
@@ -222,7 +222,7 @@ fn test_exa_provider_score_inclusion() {
 
 #[test]
 fn test_exa_provider_relevance_scoring() {
-    let provider = ExaSearchProvider::new();
+    let _provider = ExaSearchProvider::new();
 
     // Test relevance scoring features (implementation detail)
     // This ensures the relevance scoring logic is tested
@@ -231,7 +231,7 @@ fn test_exa_provider_relevance_scoring() {
 
 #[test]
 fn test_exa_provider_api_key_validation() {
-    let provider = ExaSearchProvider::new();
+    let _provider = ExaSearchProvider::new();
 
     // Test API key validation (implementation detail)
     // This ensures the API key validation logic is tested

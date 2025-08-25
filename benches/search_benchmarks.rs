@@ -9,7 +9,7 @@ use omnisearch_mcp::{
     },
     config::{CacheConfig, CacheType},
 };
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 use tokio::runtime::Runtime;
 
 // Helper function to create test search results
@@ -50,7 +50,7 @@ fn bench_cache_operations(c: &mut Criterion) {
         max_entries: 10000,
     };
 
-    let cache = MemoryCache::new(&config);
+    let cache = Arc::new(MemoryCache::new(&config));
 
     // Benchmark cache set operations with different result sizes
     for size in [1, 10, 50, 100, 500].iter() {
@@ -67,11 +67,14 @@ fn bench_cache_operations(c: &mut Criterion) {
                             test_results.clone(),
                         )
                     },
-                    |(key, results)| async move {
-                        cache
-                            .set(&key, results, Duration::from_secs(60))
-                            .await
-                            .unwrap();
+                    |(key, results)| {
+                        let cache = cache.clone();
+                        async move {
+                            cache
+                                .set(&key, results, Duration::from_secs(60))
+                                .await
+                                .unwrap();
+                        }
                     },
                     BatchSize::SmallInput,
                 );
@@ -95,9 +98,12 @@ fn bench_cache_operations(c: &mut Criterion) {
     group.bench_function("memory_cache_get_hit", |b| {
         b.to_async(&rt).iter_batched(
             || format!("bench_key_{}", fastrand::usize(..1000)),
-            |key| async move {
-                let result = cache.get(&key).await.unwrap();
-                black_box(result);
+            |key| {
+                let cache = cache.clone();
+                async move {
+                    let result = cache.get(&key).await.unwrap();
+                    black_box(result);
+                }
             },
             BatchSize::SmallInput,
         );
@@ -106,9 +112,12 @@ fn bench_cache_operations(c: &mut Criterion) {
     group.bench_function("memory_cache_get_miss", |b| {
         b.to_async(&rt).iter_batched(
             || format!("missing_key_{}", fastrand::u64(..)),
-            |key| async move {
-                let result = cache.get(&key).await.unwrap();
-                black_box(result);
+            |key| {
+                let cache = cache.clone();
+                async move {
+                    let result = cache.get(&key).await.unwrap();
+                    black_box(result);
+                }
             },
             BatchSize::SmallInput,
         );
@@ -122,11 +131,12 @@ fn bench_cache_key_generation(c: &mut Criterion) {
     let mut group = c.benchmark_group("cache_key_generation");
     group.throughput(Throughput::Elements(1));
 
-    let test_queries = vec![
+    let long_query = "x".repeat(500);
+    let test_queries = [
         "simple query",
         "longer query with more words and complexity",
         "query with special characters: @#$%^&*()",
-        &"x".repeat(500), // Long query
+        &long_query, // Long query
     ];
 
     for (i, query) in test_queries.iter().enumerate() {
@@ -159,7 +169,7 @@ fn bench_validation(c: &mut Criterion) {
             |b, params| {
                 b.iter(|| {
                     let result = validate_search_params(params);
-                    black_box(result);
+                    let _ = black_box(result);
                 });
             },
         );
@@ -180,7 +190,7 @@ fn bench_query_sanitization(c: &mut Criterion) {
     );
     let long_query = "test ".repeat(200);
 
-    let test_queries = vec![
+    let test_queries = [
         "clean query",
         "query\0with\x01control\x7fcharacters",
         &dirty_query,
@@ -297,7 +307,7 @@ fn bench_search_simulation(c: &mut Criterion) {
         max_entries: 1000,
     };
 
-    let cache = MemoryCache::new(&config);
+    let cache = Arc::new(MemoryCache::new(&config));
 
     group.bench_function("full_search_pipeline", |b| {
         b.to_async(&rt).iter_batched(
@@ -307,37 +317,40 @@ fn bench_search_simulation(c: &mut Criterion) {
                     fastrand::u32(1..=50),
                 )
             },
-            |(query, limit)| async {
-                // 1. Create and validate search params
-                let params = create_test_params(&query, Some(limit));
-                let validated = validate_search_params(&params).unwrap();
+            |(query, limit)| {
+                let cache = cache.clone();
+                async move {
+                    // 1. Create and validate search params
+                    let params = create_test_params(&query, Some(limit));
+                    let validated = validate_search_params(&params).unwrap();
 
-                // 2. Generate cache key
-                let cache_key = CacheManager::generate_cache_key(
-                    "benchmark_provider",
-                    &validated.query,
-                    validated.limit.map(|l| l as usize),
-                );
+                    // 2. Generate cache key
+                    let cache_key = CacheManager::generate_cache_key(
+                        "benchmark_provider",
+                        &validated.query,
+                        validated.limit.map(|l| l as usize),
+                    );
 
-                // 3. Check cache
-                let cached_result = cache.get(&cache_key).await.unwrap();
+                    // 3. Check cache
+                    let cached_result = cache.get(&cache_key).await.unwrap();
 
-                let results = if cached_result.is_some() {
-                    cached_result.unwrap()
-                } else {
-                    // 4. Simulate search (create mock results)
-                    let mock_results = create_test_results(limit as usize);
+                    let results = if let Some(cached) = cached_result {
+                        cached
+                    } else {
+                        // 4. Simulate search (create mock results)
+                        let mock_results = create_test_results(limit as usize);
 
-                    // 5. Cache results
-                    cache
-                        .set(&cache_key, mock_results.clone(), Duration::from_secs(60))
-                        .await
-                        .unwrap();
+                        // 5. Cache results
+                        cache
+                            .set(&cache_key, mock_results.clone(), Duration::from_secs(60))
+                            .await
+                            .unwrap();
 
-                    mock_results
-                };
+                        mock_results
+                    };
 
-                black_box(results);
+                    black_box(results);
+                }
             },
             BatchSize::SmallInput,
         );

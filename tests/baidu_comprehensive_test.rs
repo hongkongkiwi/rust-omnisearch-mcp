@@ -80,7 +80,7 @@ async fn test_baidu_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -99,7 +99,7 @@ async fn test_baidu_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -125,7 +125,7 @@ async fn test_baidu_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -167,7 +167,7 @@ async fn test_baidu_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -214,7 +214,7 @@ fn test_baidu_provider_construction() {
 
 #[test]
 fn test_baidu_provider_serpapi_integration() {
-    let provider = BaiduSearchProvider::new();
+    let _provider = BaiduSearchProvider::new();
 
     // Test SerpApi integration features (implementation detail)
     // This ensures the SerpApi logic is tested
@@ -223,7 +223,7 @@ fn test_baidu_provider_serpapi_integration() {
 
 #[test]
 fn test_baidu_provider_chinese_search_optimization() {
-    let provider = BaiduSearchProvider::new();
+    let _provider = BaiduSearchProvider::new();
 
     // Test Chinese search optimization (implementation detail)
     // This ensures the Chinese search logic is tested

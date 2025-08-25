@@ -7,7 +7,7 @@ use omnisearch_mcp::{
 
 #[tokio::test]
 async fn test_baidu_provider_missing_api_key_error() {
-    let _provider = BaiduSearchProvider::new();
+    let provider = BaiduSearchProvider::new();
 
     // Test with missing API key - should return an error
     let params = BaseSearchParams {
@@ -41,7 +41,7 @@ async fn test_baidu_provider_missing_api_key_error() {
 
 #[tokio::test]
 async fn test_baidu_provider_network_error_handling() {
-    let _provider = BaiduSearchProvider::new();
+    let provider = BaiduSearchProvider::new();
 
     // Test with a query that should trigger network errors
     let params = BaseSearchParams {
@@ -79,7 +79,7 @@ async fn test_baidu_provider_network_error_handling() {
 
 #[tokio::test]
 async fn test_baidu_provider_empty_query_handling() {
-    let _provider = BaiduSearchProvider::new();
+    let provider = BaiduSearchProvider::new();
 
     // Test handling of empty queries
     let params = BaseSearchParams {

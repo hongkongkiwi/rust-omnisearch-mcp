@@ -34,7 +34,7 @@ fn test_handle_http_error_edge_cases() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 
     // Test with 409 Conflict
@@ -53,7 +53,7 @@ fn test_handle_http_error_edge_cases() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 
     // Test with 502 Bad Gateway
@@ -72,7 +72,7 @@ fn test_handle_http_error_edge_cases() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 
     // Test with 503 Service Unavailable
@@ -91,7 +91,7 @@ fn test_handle_http_error_edge_cases() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 
     // Test with 504 Gateway Timeout
@@ -110,7 +110,7 @@ fn test_handle_http_error_edge_cases() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 }
 
@@ -133,7 +133,7 @@ fn test_handle_http_error_with_empty_messages() {
         ErrorType::ApiError
         | ErrorType::ProviderError
         | ErrorType::InvalidInput
-        | ErrorType::RateLimit => // Test passes if compilation succeeds,
+        | ErrorType::RateLimit => {} // Test passes if compilation succeeds,
     }
 
     // Should have the correct provider

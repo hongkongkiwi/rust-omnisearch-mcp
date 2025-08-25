@@ -42,6 +42,10 @@ async fn test_tavily_provider_comprehensive_search() {
                             || e.message.contains("Invalid API key")
                     );
                 }
+                ErrorType::RateLimit | ErrorType::InvalidInput | ErrorType::ProviderError => {
+                    // These are also acceptable error types for API key issues
+                    assert!(!e.message.is_empty());
+                }
             }
         }
     }
@@ -60,7 +64,7 @@ async fn test_tavily_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -79,7 +83,7 @@ async fn test_tavily_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -105,7 +109,7 @@ async fn test_tavily_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -147,7 +151,7 @@ async fn test_tavily_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }

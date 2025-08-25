@@ -81,7 +81,7 @@ async fn test_brightdata_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Empty query might still return results
             // Results length is always >= 0
         }
@@ -100,7 +100,7 @@ async fn test_brightdata_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle high limits gracefully
             // Results length is always >= 0
         }
@@ -130,7 +130,7 @@ async fn test_brightdata_provider_edge_cases() {
     };
 
     match provider.search(params).await {
-        Ok(results) => {
+        Ok(_results) => {
             // Should handle complex domain filters
             // Results length is always >= 0
         }
@@ -172,7 +172,7 @@ async fn test_brightdata_provider_error_scenarios() {
 
     for params in scenarios {
         match provider.search(params).await {
-            Ok(results) => {
+            Ok(_results) => {
                 // Even with problematic parameters, we might get results
                 // Results length is always >= 0
             }
@@ -230,7 +230,7 @@ fn test_brightdata_provider_construction() {
 
 #[test]
 fn test_brightdata_provider_serp_integration() {
-    let provider = BrightDataSearchProvider::new();
+    let _provider = BrightDataSearchProvider::new();
 
     // Test SERP integration features (implementation detail)
     // This ensures the SERP logic is tested
@@ -239,7 +239,7 @@ fn test_brightdata_provider_serp_integration() {
 
 #[test]
 fn test_brightdata_provider_advanced_filtering() {
-    let provider = BrightDataSearchProvider::new();
+    let _provider = BrightDataSearchProvider::new();
 
     // Test advanced filtering capabilities (implementation detail)
     // This ensures the advanced filtering logic is tested
@@ -248,7 +248,7 @@ fn test_brightdata_provider_advanced_filtering() {
 
 #[test]
 fn test_brightdata_provider_credential_validation() {
-    let provider = BrightDataSearchProvider::new();
+    let _provider = BrightDataSearchProvider::new();
 
     // Test credential validation (implementation detail)
     // This ensures the credential validation logic is tested

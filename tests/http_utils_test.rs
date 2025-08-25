@@ -21,8 +21,8 @@ fn test_handle_http_error_400() {
     );
 
     match error.error_type {
-        ErrorType::InvalidInput => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected InvalidInput"),
+        ErrorType::InvalidInput => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected InvalidInput"),
     }
     assert_eq!(error.provider, "test_provider");
 }
@@ -40,8 +40,8 @@ fn test_handle_http_error_401() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("Invalid API key"));
     assert_eq!(error.provider, "test_provider");
@@ -60,8 +60,8 @@ fn test_handle_http_error_403() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("API key does not have access"));
     assert_eq!(error.provider, "test_provider");
@@ -80,8 +80,8 @@ fn test_handle_http_error_429() {
     );
 
     match error.error_type {
-        ErrorType::RateLimit => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected RateLimit"),
+        ErrorType::RateLimit => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected RateLimit"),
     }
     assert!(error.message.contains("Rate limit exceeded"));
     assert_eq!(error.provider, "test_provider");
@@ -100,8 +100,8 @@ fn test_handle_http_error_500() {
     );
 
     match error.error_type {
-        ErrorType::ProviderError => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected ProviderError"),
+        ErrorType::ProviderError => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected ProviderError"),
     }
     assert!(error.message.contains("Provider internal error"));
     assert_eq!(error.provider, "test_provider");
@@ -120,8 +120,8 @@ fn test_handle_http_error_unexpected() {
     );
 
     match error.error_type {
-        ErrorType::ApiError => // Test passes if compilation succeeds,
-        _ => assert!(false, "Expected ApiError"),
+        ErrorType::ApiError => {} // Test passes if compilation succeeds,
+        _ => panic!("Expected ApiError"),
     }
     assert!(error.message.contains("Unexpected error"));
     assert!(error.message.contains("Not found"));
