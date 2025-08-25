@@ -42,7 +42,7 @@ moka = { version = "0.12", features = ["future"] }
 
 # Rate limiting
 tower = { version = "0.4", features = ["limit", "buffer"] }
-governor = "0.6"
+governor = "0.10"
 
 # Metrics and observability
 metrics = "0.22"
