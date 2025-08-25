@@ -13,7 +13,7 @@ include = [
     "LICENSE",
     "CHANGELOG.md",
 ]
-rust-version = "1.75"
+rust-version = "1.82"
 keywords = ["mcp", "search", "ai", "llm", "web-search"]
 categories = ["command-line-utilities", "web-programming", "api-bindings"]
 repository = "https://github.com/hongkongkiwi/rust-omnisearch-mcp"
