@@ -13,26 +13,57 @@ repos:
 
   - repo: local
     hooks:
+      # Format all Rust code
       - id: cargo-fmt
-        name: cargo fmt (src only)
-        entry: bash -c 'find src/ -name "*.rs" -exec rustfmt {} \;'
+        name: cargo fmt
+        entry: cargo fmt --all
         language: system
         types: [rust]
         pass_filenames: false
 
-      - id: cargo-clippy-lib
-        name: cargo clippy (lib only)
-        entry: cargo clippy --lib -- -D warnings
+      # Lint with clippy (catches code quality issues)
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
         language: system
         types: [rust]
         pass_filenames: false
 
-      - id: cargo-check-lib
-        name: cargo check (lib only)
-        entry: cargo check --lib
+      # Check that code compiles
+      - id: cargo-check
+        name: cargo check
+        entry: cargo check --all-targets --all-features
         language: system
         types: [rust]
         pass_filenames: false
+
+      # Check documentation builds without warnings
+      - id: cargo-doc
+        name: cargo doc check
+        entry: bash -c 'RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features --document-private-items'
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      # Security audit (pre-push only to avoid slowing commits)
+      - id: cargo-audit
+        name: cargo audit
+        entry: bash -c 'command -v cargo-audit >/dev/null 2>&1 && cargo audit ||
+          echo "cargo-audit not installed, skipping"'
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
+
+      # Dependency license/security check (pre-push only)
+      - id: cargo-deny
+        name: cargo deny
+        entry: bash -c 'command -v cargo-deny >/dev/null 2>&1 && cargo deny check ||
+          echo "cargo-deny not installed, skipping"'
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
 
 # Global configuration
 default_stages: [pre-commit]

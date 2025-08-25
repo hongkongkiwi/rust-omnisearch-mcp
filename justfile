@@ -164,8 +164,8 @@ profile-memory:
 # CI/CD Commands
 # --------------
 
-# Run CI checks locally (mimics GitHub Actions)
-ci: lint test audit
+# Run CI checks locally (mimics GitHub Actions - tests only)
+ci: test
     cargo check --all-features --all-targets
     @echo "✅ CI checks passed!"
 
