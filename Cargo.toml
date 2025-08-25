@@ -41,7 +41,7 @@ figment = { version = "0.10", features = ["toml", "yaml", "env"] }
 moka = { version = "0.12", features = ["future"] }
 
 # Rate limiting
-tower = { version = "0.4", features = ["limit", "buffer"] }
+tower = { version = "0.5", features = ["limit", "buffer"] }
 governor = "0.6"
 
 # Metrics and observability
