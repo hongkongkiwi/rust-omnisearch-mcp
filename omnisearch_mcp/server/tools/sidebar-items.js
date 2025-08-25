@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["register_enhancement_provider","register_processing_provider","register_search_provider","register_tools"],"static":["AVAILABLE_PROVIDERS","REGISTRY"],"struct":["AvailableProviders","ToolRegistry"]};

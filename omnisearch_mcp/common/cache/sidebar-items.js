@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["CacheManager","MemoryCache"],"trait":["CacheProvider"],"type":["CacheKey","CacheValue"]};

@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["omnisearch_mcp",[["impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.5.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"omnisearch_mcp/common/validation/struct.BLOCKED_QUERY_PATTERNS.html\" title=\"struct omnisearch_mcp::common::validation::BLOCKED_QUERY_PATTERNS\">BLOCKED_QUERY_PATTERNS</a>"],["impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.5.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"omnisearch_mcp/common/validation/struct.DOMAIN_REGEX.html\" title=\"struct omnisearch_mcp::common::validation::DOMAIN_REGEX\">DOMAIN_REGEX</a>"],["impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.5.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"omnisearch_mcp/common/validation/struct.MALICIOUS_PATTERNS.html\" title=\"struct omnisearch_mcp::common::validation::MALICIOUS_PATTERNS\">MALICIOUS_PATTERNS</a>"],["impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.5.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"omnisearch_mcp/common/validation/struct.URL_REGEX.html\" title=\"struct omnisearch_mcp::common::validation::URL_REGEX\">URL_REGEX</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1395]}

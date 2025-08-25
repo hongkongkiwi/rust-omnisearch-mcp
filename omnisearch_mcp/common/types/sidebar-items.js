@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ErrorType"],"struct":["BaseSearchParams","Enhancement","EnhancementResult","EnhancementSource","ProcessingMetadata","ProcessingResult","ProviderError","RawContent","SearchResult"],"trait":["EnhancementProvider","ProcessingProvider","SearchProvider"]};

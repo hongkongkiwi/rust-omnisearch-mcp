@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["VERSION"],"fn":["initialize"],"macro":["create_simple_provider","handle_provider_http_error"],"mod":["client","common","config","providers","server"],"struct":["OmnisearchClient","SearchRequest","SearchResponse"]};

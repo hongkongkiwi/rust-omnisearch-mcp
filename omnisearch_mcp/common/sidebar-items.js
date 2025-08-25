@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["cache","circuit_breaker","health","http","macros","metrics","provider_base","provider_factory","rate_limiter","types","validation"]};

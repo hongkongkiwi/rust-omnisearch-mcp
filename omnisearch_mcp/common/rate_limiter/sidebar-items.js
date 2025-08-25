@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["check_rate_limit","get_limiter_stats","wait_for_rate_limit"],"static":["RATE_LIMITER_MANAGER"],"struct":["RateLimiterManager","RateLimiterStats"],"type":["ProviderRateLimiter"]};

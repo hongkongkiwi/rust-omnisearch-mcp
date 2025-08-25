@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["get_all_provider_stats","get_metrics_middleware","get_provider_stats","record_request_metrics","setup_metrics_exporter"],"static":["METRICS_COLLECTOR"],"struct":["MetricsCollector","MetricsMiddleware","ProviderStats","RequestMetrics"]};
