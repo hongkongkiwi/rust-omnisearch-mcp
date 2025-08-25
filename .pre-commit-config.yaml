@@ -41,7 +41,7 @@ repos:
       # Check for clippy warnings
       - id: cargo-clippy
         name: cargo clippy
-        entry: cargo clippy --all-targets --all-features -- -W warnings
+        entry: cargo clippy --all-targets --all-features -- -D warnings
         language: system
         types: [rust]
         pass_filenames: false
@@ -68,6 +68,17 @@ repos:
         name: cargo audit
         entry: bash -c 'command -v cargo-audit >/dev/null 2>&1 && cargo audit ||
           echo "cargo-audit not installed, skipping security audit"'
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]
+
+      # Dependency license and security check
+      - id: cargo-deny
+        name: cargo deny check
+        entry:
+          bash -c 'command -v cargo-deny >/dev/null 2>&1 && cargo deny check ||
+          echo "cargo-deny not installed, skipping deny check"'
         language: system
         types: [rust]
         pass_filenames: false
@@ -113,8 +124,8 @@ ci:
 
     for more information, see https://pre-commit.ci
   autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: [cargo-test, cargo-audit]
+  skip: [cargo-test, cargo-audit, cargo-deny]
   submodules: false

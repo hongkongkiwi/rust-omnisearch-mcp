@@ -7,6 +7,7 @@ This guide covers how to configure omnisearch-mcp in different environments.
 The server uses environment variables for API keys. You only need to set variables for the providers you want to use.
 
 ### Core Search Providers
+
 ```bash
 export TAVILY_API_KEY="your-tavily-key"
 export GOOGLE_API_KEY="your-google-key"
@@ -22,6 +23,7 @@ export BRAVE_API_KEY="your-brave-key"
 ```
 
 ### AI and Processing Services
+
 ```bash
 export PERPLEXITY_API_KEY="your-perplexity-key"
 export KAGI_API_KEY="your-kagi-key"
@@ -108,6 +110,7 @@ Add to your Continue config:
 For development, you can use a `.env` file in your project root:
 
 1. Create a `.env` file:
+
 ```bash
 TAVILY_API_KEY=your-tavily-key
 GOOGLE_API_KEY=your-google-key
@@ -115,6 +118,7 @@ GOOGLE_API_KEY=your-google-key
 ```
 
 2. Load before running:
+
 ```bash
 source .env && cargo run
 ```
@@ -176,6 +180,7 @@ WantedBy=multi-user.target
 ```
 
 2. Enable and start:
+
 ```bash
 sudo systemctl enable omnisearch-mcp
 sudo systemctl start omnisearch-mcp
@@ -194,6 +199,7 @@ sudo systemctl start omnisearch-mcp
    - 1Password CLI
 
 Example with 1Password CLI:
+
 ```bash
 export TAVILY_API_KEY=$(op read "op://vault/tavily/api-key")
 ```

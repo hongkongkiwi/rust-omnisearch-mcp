@@ -6,19 +6,19 @@ rule_files:
   # - "rules/*.yml"
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'omnisearch-mcp'
+  - job_name: "omnisearch-mcp"
     static_configs:
-      - targets: ['omnisearch-mcp:9090']
+      - targets: ["omnisearch-mcp:9090"]
     scrape_interval: 10s
     metrics_path: /metrics
-    
-  - job_name: 'redis'
+
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ["redis:6379"]
     scrape_interval: 30s
 
 alerting:

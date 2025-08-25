@@ -45,7 +45,7 @@ async fn test_google_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable too
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -194,5 +194,5 @@ fn test_google_provider_domain_filtering() {
 
     // Test domain filtering functionality (implementation detail)
     // This ensures the domain filtering logic is tested
-    assert!(true); // Placeholder for domain filtering test
+    // Test passes if compilation succeeds // Placeholder for domain filtering test
 }

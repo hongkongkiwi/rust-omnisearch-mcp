@@ -20,7 +20,7 @@ async fn test_google_provider_missing_credentials_error() {
     match provider.search(params).await {
         Ok(_) => {
             // If we get results, that's fine for testing purposes
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // We expect credential errors
@@ -35,7 +35,7 @@ async fn test_google_provider_missing_credentials_error() {
                 }
                 _ => {
                     // Other error types are acceptable too
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -58,7 +58,7 @@ async fn test_google_provider_invalid_parameters() {
         Ok(_results) => {
             // Even with invalid parameters, we might get results
             // assert!(results.len() >= 0);  // This comparison is always true
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // Invalid parameters might cause errors, which is fine
@@ -83,7 +83,7 @@ async fn test_google_provider_extreme_limits() {
         Ok(_results) => {
             // Should handle extreme limits gracefully
             // assert!(results.len() >= 0);  // This comparison is always true
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // Might hit API limits, which is fine

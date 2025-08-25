@@ -123,15 +123,15 @@ Example test structure:
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[tokio::test]
     async fn test_provider_search() {
         // Setup
         let provider = GoogleProvider::new("test-key".to_string());
-        
+
         // Execute
         let results = provider.search("rust programming", 10).await;
-        
+
         // Assert
         assert!(results.is_ok());
         assert!(!results.unwrap().is_empty());
@@ -207,6 +207,7 @@ RUST_LOG=debug cargo run
 ```
 
 Logging levels:
+
 - `error`: Only errors
 - `warn`: Warnings and errors
 - `info`: General information

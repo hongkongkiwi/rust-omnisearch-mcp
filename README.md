@@ -34,7 +34,7 @@ cargo install omnisearch-mcp --force
 Download the appropriate binary for your platform from the [GitHub Releases](https://github.com/hongkongkiwi/rust-omnisearch-mcp/releases):
 
 - **Linux**: `omnisearch-mcp-linux-amd64` or `omnisearch-mcp-linux-arm64`
-- **macOS**: `omnisearch-mcp-macos-amd64` or `omnisearch-mcp-macos-arm64` 
+- **macOS**: `omnisearch-mcp-macos-amd64` or `omnisearch-mcp-macos-arm64`
 - **Windows**: `omnisearch-mcp-windows-amd64.exe`
 
 ```bash
@@ -269,16 +269,17 @@ For any MCP-compatible tool, the general configuration pattern is:
 
 ### Configuration Tips
 
-1. **Path to executable**: 
+1. **Path to executable**:
    - **Cargo install**: `~/.cargo/bin/omnisearch-mcp` (or just `omnisearch-mcp` if `~/.cargo/bin` is in your PATH)
    - **Pre-built binary**: `/usr/local/bin/omnisearch-mcp` (or wherever you placed it)
    - **From source**: `/path/to/rust-omnisearch-mcp/target/release/omnisearch-mcp`
 
-2. **Find your installation**: 
+2. **Find your installation**:
+
    ```bash
    # Check if it's in your PATH
    which omnisearch-mcp
-   
+
    # Or find the Cargo installation
    ls ~/.cargo/bin/omnisearch-mcp
    ```
@@ -287,7 +288,7 @@ For any MCP-compatible tool, the general configuration pattern is:
 
 4. **Testing**: After configuration, restart your AI coding tool and check if the omnisearch tools appear in the available MCP tools list.
 
-5. **Updates**: 
+5. **Updates**:
    - Cargo: `cargo install omnisearch-mcp --force`
    - Binary: Download new release and replace existing file
    - Source: `git pull && cargo build --release`
@@ -301,6 +302,7 @@ For any MCP-compatible tool, the general configuration pattern is:
 ## Available Providers
 
 ### Search Providers
+
 - **Tavily** - Factual search with citations
 - **Google Custom Search** - Google's search API
 - **Reddit** - Community discussions
@@ -311,6 +313,7 @@ For any MCP-compatible tool, the general configuration pattern is:
 - **Brave** - Privacy-focused with operators
 
 ### AI & Processing Services
+
 - **Perplexity AI** - GPT-4/Claude with web search
 - **Kagi** - FastGPT, Summarizer, Enrichment
 - **Jina AI** - Reader, Grounding

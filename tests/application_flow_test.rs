@@ -9,7 +9,7 @@ fn test_application_initialization() {
 
     // Test that we can initialize providers without panicking
     initialize_providers();
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn test_config_validation_output() {
     match result {
         Ok(()) => {
             // Config validation succeeded
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // Config validation failed, but that's expected in test environment
@@ -38,5 +38,5 @@ fn test_provider_initialization_no_panic() {
     initialize_providers();
 
     // If we get here, initialization completed without panicking
-    assert!(true);
+    // Test passes if compilation succeeds
 }

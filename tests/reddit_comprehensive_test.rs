@@ -44,7 +44,7 @@ async fn test_reddit_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -194,7 +194,7 @@ fn test_reddit_provider_oauth2_authentication() {
 
     // Test OAuth2 authentication flow (implementation detail)
     // This ensures the OAuth2 logic is tested
-    assert!(true); // Placeholder for OAuth2 authentication test
+    // Test passes if compilation succeeds // Placeholder for OAuth2 authentication test
 }
 
 #[test]
@@ -203,5 +203,5 @@ fn test_reddit_provider_rate_limiting() {
 
     // Test rate limiting handling (implementation detail)
     // This ensures the rate limiting logic is tested
-    assert!(true); // Placeholder for rate limiting test
+    // Test passes if compilation succeeds // Placeholder for rate limiting test
 }

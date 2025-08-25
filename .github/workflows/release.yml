@@ -2,13 +2,13 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release'
+        description: "Tag to release"
         required: true
-        default: 'v0.1.0'
+        default: "v0.1.0"
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,7 +28,7 @@ jobs:
       version: ${{ steps.get_version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Get version from tag
         id: get_version
         run: |
@@ -37,12 +37,12 @@ jobs:
           else
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Generate Release Notes
         id: release_notes
         run: |
           VERSION="v${{ steps.get_version.outputs.version }}"
-          
+
           # Get commits since last release
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null | head -1 || echo "")
           if [ -n "$LAST_TAG" ] && [ "$LAST_TAG" != "$VERSION" ]; then
@@ -50,42 +50,42 @@ jobs:
           else
             COMMITS=$(git log --oneline --pretty=format:"- %s" | head -10)
           fi
-          
+
           # Create release notes
           cat > release_notes.md << EOF
           ## 🚀 What's New in $VERSION
-          
+
           ### Changes
           $COMMITS
-          
+
           ### 📦 Installation
-          
+
           #### Download Pre-built Binaries
           Choose the appropriate binary for your platform from the assets below.
-          
+
           #### Install via Cargo
           \`\`\`bash
           cargo install omnisearch-mcp
           \`\`\`
-          
+
           #### Build from Source
           \`\`\`bash
           git clone https://github.com/${{ github.repository }}.git
           cd rust-omnisearch-mcp
           cargo build --release
           \`\`\`
-          
+
           ### 🔧 Usage
-          
+
           After installation, you can use omnisearch-mcp as an MCP server with Claude Desktop or other MCP-compatible clients.
-          
+
           ### 📋 Full Changelog
-          
+
           For detailed changes, see the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md).
           EOF
-          
+
           echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
-          
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -112,59 +112,59 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             cross: false
-            
+
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             cross: true
-            
+
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             cross: true
-            
+
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             cross: true
-            
+
           - target: armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
             cross: true
-            
+
           # macOS targets
           - target: x86_64-apple-darwin
             os: macos-latest
             cross: false
-            
+
           - target: aarch64-apple-darwin
             os: macos-latest
             cross: false
-            
+
           # Windows targets
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             cross: false
-            
+
           - target: x86_64-pc-windows-gnu
             os: ubuntu-latest
             cross: true
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      
+
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
-      
+
       - name: Install cross-compilation tools
         if: matrix.cross
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-      
+
       - name: Build binary
         run: |
           if [[ "${{ matrix.cross }}" == "true" ]]; then
@@ -172,14 +172,14 @@ jobs:
           else
             cargo build --release --target ${{ matrix.target }}
           fi
-      
+
       - name: Strip binary (Unix)
         if: matrix.os != 'windows-latest'
         run: |
           if command -v strip >/dev/null 2>&1; then
             strip target/${{ matrix.target }}/release/omnisearch-mcp
           fi
-      
+
       - name: Prepare binary for upload
         shell: bash
         run: |
@@ -192,18 +192,18 @@ jobs:
             ASSET_NAME="omnisearch-mcp-${{ matrix.target }}"
           fi
           mv "$BIN_NAME" "$ASSET_NAME"
-          
+
           # Generate checksums
           if command -v sha256sum >/dev/null 2>&1; then
             sha256sum "$ASSET_NAME" > "$ASSET_NAME.sha256"
           elif command -v shasum >/dev/null 2>&1; then
             shasum -a 256 "$ASSET_NAME" > "$ASSET_NAME.sha256"
           fi
-          
+
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "ASSET_PATH=target/${{ matrix.target }}/release/$ASSET_NAME" >> $GITHUB_ENV
           echo "CHECKSUM_PATH=target/${{ matrix.target }}/release/$ASSET_NAME.sha256" >> $GITHUB_ENV
-      
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -213,7 +213,7 @@ jobs:
           asset_path: ${{ env.ASSET_PATH }}
           asset_name: ${{ env.ASSET_NAME }}
           asset_content_type: application/octet-stream
-      
+
       - name: Upload Checksum
         uses: actions/upload-release-asset@v1
         env:
@@ -230,17 +230,17 @@ jobs:
     needs: create-release
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -249,7 +249,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=raw,value=latest,enable={{is_default_branch}}
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -268,15 +268,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Update version in Cargo.toml
         run: |
           VERSION="${{ needs.create-release.outputs.version }}"
           sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
-      
+
       - name: Publish to crates.io
         run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
         continue-on-error: true

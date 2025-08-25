@@ -65,7 +65,7 @@ async fn test_brightdata_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -238,7 +238,7 @@ fn test_brightdata_provider_serp_integration() {
 
     // Test SERP integration features (implementation detail)
     // This ensures the SERP logic is tested
-    assert!(true); // Placeholder for SERP integration test
+    // Test passes if compilation succeeds // Placeholder for SERP integration test
 }
 
 #[test]
@@ -247,7 +247,7 @@ fn test_brightdata_provider_advanced_filtering() {
 
     // Test advanced filtering capabilities (implementation detail)
     // This ensures the advanced filtering logic is tested
-    assert!(true); // Placeholder for advanced filtering test
+    // Test passes if compilation succeeds // Placeholder for advanced filtering test
 }
 
 #[test]
@@ -256,5 +256,5 @@ fn test_brightdata_provider_credential_validation() {
 
     // Test credential validation (implementation detail)
     // This ensures the credential validation logic is tested
-    assert!(true); // Placeholder for credential validation test
+    // Test passes if compilation succeeds // Placeholder for credential validation test
 }

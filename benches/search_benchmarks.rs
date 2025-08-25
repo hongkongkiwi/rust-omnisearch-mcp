@@ -3,7 +3,7 @@ use criterion::{
 };
 use omnisearch_mcp::{
     common::{
-        cache::{CacheManager, MemoryCache},
+        cache::{CacheManager, CacheProvider, MemoryCache},
         types::{BaseSearchParams, SearchResult},
         validation::{sanitize_query, validate_search_params},
     },
@@ -18,10 +18,9 @@ fn create_test_results(count: usize) -> Vec<SearchResult> {
         .map(|i| SearchResult {
             title: format!("Test Result {}", i),
             url: format!("https://example.com/{}", i),
-            snippet: Some(format!("Test snippet for result {}", i)),
+            snippet: format!("Test snippet for result {}", i),
             score: Some(1.0 - (i as f64 / count as f64)),
-            published_date: None,
-            favicon_url: None,
+            source_provider: "benchmark".to_string(),
         })
         .collect()
 }
@@ -49,7 +48,6 @@ fn bench_cache_operations(c: &mut Criterion) {
         cache_type: CacheType::Memory,
         ttl_seconds: 3600,
         max_entries: 10000,
-        redis: Default::default(),
     };
 
     let cache = MemoryCache::new(&config);
@@ -134,11 +132,7 @@ fn bench_cache_key_generation(c: &mut Criterion) {
     for (i, query) in test_queries.iter().enumerate() {
         group.bench_with_input(BenchmarkId::new("generate_key", i), query, |b, query| {
             b.iter(|| {
-                let key = CacheManager::generate_cache_key(
-                    "test_provider",
-                    query,
-                    "limit=10&domains=github.com",
-                );
+                let key = CacheManager::generate_cache_key("test_provider", query, Some(10));
                 black_box(key);
             });
         });
@@ -179,15 +173,18 @@ fn bench_query_sanitization(c: &mut Criterion) {
     let mut group = c.benchmark_group("query_sanitization");
     group.throughput(Throughput::Elements(1));
 
+    let dirty_query = format!(
+        "{}dirty query with nulls{}",
+        "\0".repeat(10),
+        "\x01".repeat(10)
+    );
+    let long_query = "test ".repeat(200);
+
     let test_queries = vec![
         "clean query",
         "query\0with\x01control\x7fcharacters",
-        &format!(
-            "{}dirty query with nulls{}",
-            "\0".repeat(10),
-            "\x01".repeat(10)
-        ),
-        &"test ".repeat(200), // Long query
+        &dirty_query,
+        &long_query,
     ];
 
     for (i, query) in test_queries.iter().enumerate() {
@@ -250,7 +247,6 @@ fn bench_concurrent_cache_access(c: &mut Criterion) {
         cache_type: CacheType::Memory,
         ttl_seconds: 3600,
         max_entries: 10000,
-        redis: Default::default(),
     };
 
     let cache = MemoryCache::new(&config);
@@ -299,7 +295,6 @@ fn bench_search_simulation(c: &mut Criterion) {
         cache_type: CacheType::Memory,
         ttl_seconds: 3600,
         max_entries: 1000,
-        redis: Default::default(),
     };
 
     let cache = MemoryCache::new(&config);
@@ -321,7 +316,7 @@ fn bench_search_simulation(c: &mut Criterion) {
                 let cache_key = CacheManager::generate_cache_key(
                     "benchmark_provider",
                     &validated.query,
-                    &format!("limit={:?}", validated.limit),
+                    validated.limit.map(|l| l as usize),
                 );
 
                 // 3. Check cache

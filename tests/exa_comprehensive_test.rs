@@ -64,7 +64,7 @@ async fn test_exa_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }

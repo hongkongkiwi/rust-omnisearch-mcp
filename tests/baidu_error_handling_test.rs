@@ -21,7 +21,7 @@ async fn test_baidu_provider_missing_api_key_error() {
         Ok(_) => {
             // If we get results, that's fine, but we're mainly testing
             // that the function doesn't panic
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // We expect an API key error
@@ -32,7 +32,7 @@ async fn test_baidu_provider_missing_api_key_error() {
                 }
                 _ => {
                     // Other error types are acceptable too
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -66,11 +66,11 @@ async fn test_baidu_provider_network_error_handling() {
             match e.error_type {
                 ErrorType::ApiError | ErrorType::InvalidInput | ErrorType::ProviderError => {
                     // These are all acceptable error types
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
                 _ => {
                     // Any other error type is also fine
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -93,7 +93,7 @@ async fn test_baidu_provider_empty_query_handling() {
         Ok(_results) => {
             // Empty query might still return results or empty list
             // assert!(results.len() >= 0);  // This comparison is always true
-            assert!(true);
+            // Test passes if compilation succeeds
         }
         Err(e) => {
             // Empty query might cause an error, which is fine

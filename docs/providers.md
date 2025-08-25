@@ -24,11 +24,13 @@ This guide provides detailed setup instructions for each search provider support
 Optimized for factual information with strong citation support.
 
 ### Setup
+
 1. Sign up at [Tavily](https://tavily.com)
 2. Get your API key from the dashboard
 3. Set environment variable: `TAVILY_API_KEY=your-api-key`
 
 ### Features
+
 - Strong citation support
 - Domain filtering (include_domains/exclude_domains)
 - Optimized for technical and academic queries
@@ -40,6 +42,7 @@ Optimized for factual information with strong citation support.
 Google's powerful search capabilities with reliable results and snippets.
 
 ### Setup
+
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com)
 2. Enable Custom Search API
 3. Create credentials (API Key)
@@ -49,6 +52,7 @@ Google's powerful search capabilities with reliable results and snippets.
    - `GOOGLE_SEARCH_ENGINE_ID=your-search-engine-id`
 
 ### Features
+
 - High-quality search results with snippets
 - Domain filtering capabilities
 - Reliable and fast response times
@@ -60,6 +64,7 @@ Google's powerful search capabilities with reliable results and snippets.
 Access discussions and content from Reddit communities.
 
 ### Setup
+
 1. Go to [Reddit Apps](https://www.reddit.com/prefs/apps)
 2. Create a new app (select "script" type)
 3. Note your client ID (under "personal use script")
@@ -70,6 +75,7 @@ Access discussions and content from Reddit communities.
    - `REDDIT_USER_AGENT=YourApp/1.0 by YourUsername`
 
 ### Features
+
 - OAuth2 authentication
 - Search by relevance, new, top
 - Access to all public subreddits
@@ -81,9 +87,11 @@ Access discussions and content from Reddit communities.
 Privacy-focused search without tracking.
 
 ### Setup
+
 No API key required - works out of the box!
 
 ### Features
+
 - Complete privacy - no tracking
 - No authentication required
 - Fast response times
@@ -96,11 +104,13 @@ No API key required - works out of the box!
 Access to China's leading search engine via SerpApi.
 
 ### Setup
+
 1. Sign up at [SerpApi](https://serpapi.com)
 2. Get your API key from the dashboard
 3. Set environment variable: `SERPAPI_API_KEY=your-serpapi-key`
 
 ### Features
+
 - Chinese language content
 - Access to Baidu search results
 - Reliable through SerpApi infrastructure
@@ -112,6 +122,7 @@ Access to China's leading search engine via SerpApi.
 High-quality search results with advanced filtering.
 
 ### Setup
+
 1. Sign up at [Bright Data](https://brightdata.com)
 2. Create a SERP API user
 3. Get your credentials
@@ -120,6 +131,7 @@ High-quality search results with advanced filtering.
    - `BRIGHTDATA_PASSWORD=your-password`
 
 ### Features
+
 - Advanced filtering options
 - High-quality search results
 - Enterprise-grade reliability
@@ -131,11 +143,13 @@ High-quality search results with advanced filtering.
 High-quality search with relevance scoring.
 
 ### Setup
+
 1. Sign up at [Exa](https://exa.ai)
 2. Get your API key from the dashboard
 3. Set environment variable: `EXA_API_KEY=your-exa-key`
 
 ### Features
+
 - Relevance scoring for results
 - High-quality search results
 - Optimized for AI applications
@@ -147,11 +161,13 @@ High-quality search with relevance scoring.
 Advanced response generation combining real-time web search with AI models.
 
 ### Setup
+
 1. Sign up at [Perplexity](https://perplexity.ai)
 2. Get your API key from settings
 3. Set environment variable: `PERPLEXITY_API_KEY=your-perplexity-key`
 
 ### Features
+
 - GPT-4 Omni and Claude 3 integration
 - Real-time web search
 - Contextual memory for follow-ups
@@ -163,11 +179,13 @@ Advanced response generation combining real-time web search with AI models.
 Multiple services including FastGPT, Universal Summarizer, and Enrichment API.
 
 ### Setup
+
 1. Sign up at [Kagi](https://kagi.com)
 2. Get your API key from settings
 3. Set environment variable: `KAGI_API_KEY=your-kagi-key`
 
 ### Services
+
 - **FastGPT**: Quick AI answers (900ms response time)
 - **Universal Summarizer**: Summarize pages, videos, podcasts
 - **Enrichment API**: Specialized content indexes
@@ -179,11 +197,13 @@ Multiple services including FastGPT, Universal Summarizer, and Enrichment API.
 Content processing and fact verification services.
 
 ### Setup
+
 1. Sign up at [Jina AI](https://jina.ai)
 2. Get your API key
 3. Set environment variable: `JINA_AI_API_KEY=your-jina-key`
 
 ### Services
+
 - **Reader**: Clean content extraction with PDF support
 - **Grounding**: Real-time fact verification
 
@@ -194,11 +214,13 @@ Content processing and fact verification services.
 Privacy-focused search with good technical coverage.
 
 ### Setup
+
 1. Sign up at [Brave Search API](https://brave.com/search/api/)
 2. Get your API key
 3. Set environment variable: `BRAVE_API_KEY=your-brave-key`
 
 ### Features
+
 - Privacy protection
 - Native search operators support
 - Good for technical documentation
@@ -210,6 +232,7 @@ Privacy-focused search with good technical coverage.
 Comprehensive web scraping and crawling services.
 
 ### Setup
+
 1. Sign up at [Firecrawl](https://firecrawl.dev) or self-host
 2. Get your API key
 3. Set environment variables:
@@ -217,6 +240,7 @@ Comprehensive web scraping and crawling services.
    - `FIRECRAWL_BASE_URL=http://localhost:3002` (optional, for self-hosted)
 
 ### Services
+
 - **Scrape**: Extract clean, LLM-ready data
 - **Crawl**: Deep crawl websites
 - **Map**: Fast URL discovery

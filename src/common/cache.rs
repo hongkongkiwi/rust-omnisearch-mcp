@@ -188,8 +188,8 @@ mod tests {
         assert_eq!(retrieved.unwrap().len(), 2);
 
         // Test size (moka cache may not immediately report size)
-        let size = cache.size().await.unwrap();
-        assert!(size >= 0); // Cache should exist and report size
+        let _size = cache.size().await.unwrap();
+        // Cache should exist and report size (size is always >= 0 for usize)
 
         // Test delete
         cache.delete("test_key").await.unwrap();

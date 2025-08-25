@@ -369,7 +369,7 @@ async fn test_network_timeout_simulation() {
         }
         Err(_) => {
             // Timeout occurred, which is expected
-            assert!(true);
+            // Test passes if compilation succeeds
         }
     }
 }

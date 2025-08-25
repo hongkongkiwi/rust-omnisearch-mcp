@@ -7,7 +7,7 @@ use omnisearch_mcp::common::provider_factory::ProviderFactory;
 fn test_provider_factory_creation() {
     // Just test that we can create the factory
     let _factory = ProviderFactory;
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]

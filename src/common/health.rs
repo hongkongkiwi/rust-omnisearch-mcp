@@ -537,7 +537,7 @@ mod tests {
         let status = get_health_status().await;
 
         assert!(!status.version.is_empty());
-        assert!(status.uptime_seconds >= 0);
+        // uptime_seconds is always >= 0 for u64
         assert!(!status.checks.is_empty());
 
         // Should have at least basic checks

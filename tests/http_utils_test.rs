@@ -5,7 +5,7 @@ use omnisearch_mcp::common::types::ErrorType;
 fn test_create_http_client() {
     let _client = create_http_client(5000);
     // Just test that we can create a client without panicking
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]

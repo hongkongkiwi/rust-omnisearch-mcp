@@ -13,34 +13,38 @@ Thank you for your interest in contributing to Omnisearch MCP! This document pro
 ### Setting Up the Development Environment
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/hongkongkiwi/rust-omnisearch-mcp.git
    cd rust-omnisearch-mcp
    ```
 
 2. **Install Rust dependencies:**
+
    ```bash
    cargo build
    ```
 
 3. **Install pre-commit hooks (recommended):**
+
    ```bash
    # Install pre-commit (if not already installed)
    pip install pre-commit
    # or using brew on macOS: brew install pre-commit
-   
+
    # Install the git hook scripts
    pre-commit install
-   
+
    # Optionally install pre-push hooks
    pre-commit install --hook-type pre-push
    ```
 
 4. **Install additional tools (optional but recommended):**
+
    ```bash
    # Security audit tool
    cargo install cargo-audit
-   
+
    # Better error messages
    cargo install cargo-expand
    ```

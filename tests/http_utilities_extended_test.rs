@@ -11,7 +11,7 @@ fn test_create_http_client_with_various_timeouts() {
     let _client3 = create_http_client(30000); // 30 seconds
 
     // All should be created successfully
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]
@@ -141,5 +141,5 @@ fn test_handle_http_error_with_empty_messages() {
 
     // Message should exist (even if generic)
     // We won't assert on message content since it might vary
-    assert!(true);
+    // Test passes if compilation succeeds
 }

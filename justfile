@@ -247,13 +247,13 @@ env-example:
     REDDIT_CLIENT_SECRET=your_reddit_client_secret_here
     BRIGHTDATA_USERNAME=your_brightdata_username_here
     BRIGHTDATA_PASSWORD=your_brightdata_password_here
-    
+
     # Redis Configuration (optional)
     REDIS_URL=redis://localhost:6379
-    
+
     # Metrics Configuration (optional)
     PROMETHEUS_PORT=9090
-    
+
     # Logging
     RUST_LOG=info
     EOF

@@ -109,5 +109,5 @@ fn test_provider_factory_with_duplicate_names() {
 fn test_provider_factory_creation_methods() {
     // Test that we can create the factory
     let _factory = ProviderFactory {};
-    assert!(true);
+    // Test passes if compilation succeeds
 }

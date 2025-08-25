@@ -46,7 +46,7 @@ echo ""
 COVERAGE_PERCENTAGE=$(echo "$COVERAGE_OUTPUT" | grep -oE '[0-9]+\.[0-9]+%' | head -1)
 if [[ -n "$COVERAGE_PERCENTAGE" ]]; then
     echo "📈 Current Coverage: $COVERAGE_PERCENTAGE"
-    
+
     # Convert to number for comparison
     COVERAGE_NUM=$(echo "$COVERAGE_PERCENTAGE" | sed 's/%//')
     if (( $(echo "$COVERAGE_NUM > 50" | bc -l) )); then
@@ -96,7 +96,7 @@ echo "   3. Start using the comprehensive search capabilities"
 echo ""
 echo "🔐 REQUIRED ENVIRONMENT VARIABLES:"
 echo "   TAVILY_API_KEY=your-tavily-key              # Optional"
-echo "   PERPLEXITY_API_KEY=your-perplexity-key      # Optional"  
+echo "   PERPLEXITY_API_KEY=your-perplexity-key      # Optional"
 echo "   KAGI_API_KEY=your-kagi-key                  # Optional"
 echo "   JINA_AI_API_KEY=your-jina-key               # Optional"
 echo "   BRAVE_API_KEY=your-brave-key                # Optional"

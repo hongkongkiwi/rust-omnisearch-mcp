@@ -20,18 +20,18 @@
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Create a client with available providers
 //!     let client = OmnisearchClient::new().await?;
-//!     
+//!
 //!     // Perform a search
 //!     let request = SearchRequest::new("rust programming")
 //!         .limit(10)
 //!         .include_domains(&["github.com", "docs.rs"]);
-//!     
+//!
 //!     let results = client.search(request).await?;
-//!     
+//!
 //!     for result in results {
 //!         println!("{}: {}", result.title, result.url);
 //!     }
-//!     
+//!
 //!     Ok(())
 //! }
 //! ```

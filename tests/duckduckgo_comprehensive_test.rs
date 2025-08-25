@@ -61,7 +61,7 @@ async fn test_duckduckgo_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -216,7 +216,7 @@ fn test_duckduckgo_provider_privacy_features() {
 
     // Test privacy-focused features (implementation detail)
     // This ensures the privacy logic is tested
-    assert!(true); // Placeholder for privacy features test
+    // Test passes if compilation succeeds // Placeholder for privacy features test
 }
 
 #[test]
@@ -225,5 +225,5 @@ fn test_duckduckgo_provider_no_api_key_required() {
 
     // Test that DuckDuckGo doesn't require API keys
     // This is a key feature of the provider
-    assert!(true); // Placeholder for no API key test
+    // Test passes if compilation succeeds // Placeholder for no API key test
 }

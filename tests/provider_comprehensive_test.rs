@@ -46,7 +46,7 @@ fn test_all_provider_construction() {
     assert_eq!(brightdata.name(), "brightdata");
     assert_eq!(exa.name(), "exa");
 
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]

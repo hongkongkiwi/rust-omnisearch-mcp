@@ -64,7 +64,7 @@ async fn test_baidu_provider_comprehensive_search() {
                 }
                 _ => {
                     // Other error types are acceptable
-                    assert!(true);
+                    // Test passes if compilation succeeds
                 }
             }
         }
@@ -222,7 +222,7 @@ fn test_baidu_provider_serpapi_integration() {
 
     // Test SerpApi integration features (implementation detail)
     // This ensures the SerpApi logic is tested
-    assert!(true); // Placeholder for SerpApi integration test
+    // Test passes if compilation succeeds // Placeholder for SerpApi integration test
 }
 
 #[test]
@@ -231,5 +231,5 @@ fn test_baidu_provider_chinese_search_optimization() {
 
     // Test Chinese search optimization (implementation detail)
     // This ensures the Chinese search logic is tested
-    assert!(true); // Placeholder for Chinese search optimization test
+    // Test passes if compilation succeeds // Placeholder for Chinese search optimization test
 }

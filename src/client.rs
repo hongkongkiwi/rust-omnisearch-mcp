@@ -20,21 +20,21 @@ use std::collections::HashMap;
 /// #[tokio::main]
 /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///     let client = OmnisearchClient::new().await?;
-///     
+///
 ///     let request = SearchRequest::new("rust async programming")
 ///         .limit(5)
 ///         .provider("tavily");
-///     
+///
 ///     let response = client.search(request).await?;
-///     
+///
 ///     println!("Found {} results from {} providers",
 ///         response.results.len(),
 ///         response.providers_used.len());
-///     
+///
 ///     for result in response.results {
 ///         println!("- {}: {}", result.title, result.url);
 ///     }
-///     
+///
 ///     Ok(())
 /// }
 /// ```

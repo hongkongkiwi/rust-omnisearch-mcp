@@ -19,7 +19,7 @@ fn test_tool_registry_creation() {
 
     // Registry should be created successfully - we can't access private fields
     // but we can test that creation doesn't panic
-    assert!(true);
+    // Test passes if compilation succeeds
 }
 
 #[test]
