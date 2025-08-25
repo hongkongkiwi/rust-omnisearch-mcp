@@ -53,16 +53,12 @@ watch:
 lint:
     cargo clippy -- -D warnings
 
-# Format code
+# Format code (run automatically by pre-commit hooks)
 fmt:
-    cargo fmt
+    cargo fmt --all
 
-# Check formatting without modifying files
-fmt-check:
-    cargo fmt --check
-
-# Run all quality checks (format, lint, test)
-check: fmt-check lint test
+# Run all quality checks (lint, test)
+check: lint test
     @echo "✅ All checks passed!"
 
 # Security audit for dependencies
@@ -169,7 +165,7 @@ profile-memory:
 # --------------
 
 # Run CI checks locally (mimics GitHub Actions)
-ci: fmt-check lint test audit
+ci: lint test audit
     cargo check --all-features --all-targets
     @echo "✅ CI checks passed!"
 

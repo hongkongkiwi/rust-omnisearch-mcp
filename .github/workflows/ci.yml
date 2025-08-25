@@ -33,7 +33,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy, llvm-tools-preview
+          components: clippy, llvm-tools-preview
 
       - name: Install just
         uses: extractions/setup-just@v2
@@ -42,9 +42,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.os }}-${{ matrix.rust }}
-
-      - name: Check formatting
-        run: just fmt-check
 
       - name: Run clippy
         run: just lint

@@ -111,7 +111,7 @@ Use clear, descriptive commit messages:
 
 ```
 feat: add new search provider for DuckDuckGo
-fix: handle timeout errors in HTTP requests  
+fix: handle timeout errors in HTTP requests
 docs: update installation instructions
 test: add integration tests for search functionality
 ```

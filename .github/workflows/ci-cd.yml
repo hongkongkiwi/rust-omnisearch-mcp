@@ -40,9 +40,6 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Check formatting
-        run: just fmt-check
-
       - name: Build
         run: just build
 
