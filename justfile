@@ -175,7 +175,7 @@ ci: fmt-check lint test audit
 
 # Check MSRV compatibility
 check-msrv:
-    cargo +1.75 check --all-features --all-targets
+    cargo +1.82 check --all-features --all-targets
 
 # Generate and commit a changelog entry
 changelog MESSAGE:

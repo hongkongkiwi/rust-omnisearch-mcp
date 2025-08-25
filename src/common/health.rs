@@ -7,10 +7,7 @@ use std::{
 use tracing::{debug, error, info};
 
 use crate::{
-    common::{
-        circuit_breaker::get_circuit_breaker_stats,
-        metrics::METRICS_COLLECTOR,
-    },
+    common::{circuit_breaker::get_circuit_breaker_stats, metrics::METRICS_COLLECTOR},
     config::CONFIG,
 };
 
