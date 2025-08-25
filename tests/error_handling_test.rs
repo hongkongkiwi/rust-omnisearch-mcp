@@ -21,7 +21,7 @@ fn test_provider_error_creation() {
 
 #[test]
 fn test_provider_error_with_source() {
-    let source_error = anyhow::anyhow!("Source error");
+    let source_error = eyre::eyre!("Source error");
     let error = ProviderError::new(
         ErrorType::RateLimit,
         "Rate limit exceeded".to_string(),

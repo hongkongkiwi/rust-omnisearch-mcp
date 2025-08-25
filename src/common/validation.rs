@@ -438,7 +438,7 @@ mod tests {
         let params = BaseSearchParams {
             query: "test query".to_string(),
             limit: Some(10),
-            include_domains: Some(vec!["not-a-valid-domain".to_string()]),
+            include_domains: Some(vec!["invalid..domain".to_string()]),
             exclude_domains: None,
         };
 
